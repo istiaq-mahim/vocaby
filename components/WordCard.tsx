@@ -18,27 +18,20 @@ const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-sm border border-slate-100 dark:border-gray-700 word-card-hover cursor-pointer overflow-hidden relative">
+    <div className="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-gray-700 word-card-hover cursor-pointer overflow-hidden relative">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-[#0052CC] dark:text-blue-400 capitalize mb-1">
+          <h2 className="text-4xl font-extrabold text-[#0052CC] dark:text-blue-400 capitalize mb-2 tracking-tight">
             {wordData.word}
           </h2>
-          <p className="text-2xl font-bold text-[#4F46E5] mb-2">
+          <p className="text-2xl font-bold text-[#4F46E5] bangla-text">
             {wordData.meaning_bangla}
           </p>
-          <div className="space-y-0.5">
-            <p className="text-slate-400 text-sm font-medium">
-              ইউবিকুইটাস <span className="text-slate-300 dark:text-gray-500">(Yoo-bi-kwee-tas)</span>
-            </p>
-            <p className="text-slate-400 text-xs italic">
-              /juːˈbɪkwɪtəs/
-            </p>
-          </div>
         </div>
         <button 
           onClick={handlePronounce}
           className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-blue-50 transition-all shadow-inner"
+          aria-label="Listen to pronunciation"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -62,6 +55,22 @@ const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
       <div className="space-y-6">
         <Section title="Synonyms" items={wordData.synonyms} />
         <Section title="Antonyms" items={wordData.antonyms} />
+        
+        <div className="pt-4 border-t border-slate-50 dark:border-gray-700">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Examples</h4>
+          <div className="grid grid-cols-1 gap-4">
+            {wordData.examples.slice(0, 4).map((ex, i) => (
+              <div key={i} className="flex gap-4 group">
+                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300 text-[10px] font-black">
+                  {i + 1}
+                </span>
+                <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed italic group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                  "{ex}"
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -71,12 +80,12 @@ const Section: React.FC<{title: string, items: SynonymAntonym[]}> = ({title, ite
   if (!items || items.length === 0) return null;
   return (
     <div>
-      <h4 className="text-sm font-extrabold text-slate-800 dark:text-gray-200 mb-3">{title}</h4>
+      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{title}</h4>
       <div className="flex flex-wrap gap-2">
-        {items.map((item, i) => (
-          <span key={i} className="px-4 py-2 bg-slate-50 dark:bg-gray-700 rounded-full text-sm font-medium border border-slate-100 dark:border-gray-600 flex items-center gap-1.5">
-            <span className="text-slate-700 dark:text-gray-200">{item.word}</span>
-            <span className="text-slate-400 dark:text-gray-500 font-normal">({item.meaning})</span>
+        {items.slice(0, 3).map((item, i) => (
+          <span key={i} className="px-4 py-2 bg-slate-50 dark:bg-gray-700 rounded-2xl text-sm font-medium border border-slate-100 dark:border-gray-600 flex items-center gap-2 transition-all hover:border-primary/40 hover:bg-white">
+            <span className="text-[#0052CC] dark:text-blue-300 font-bold">{item.word}</span>
+            <span className="text-slate-500 dark:text-gray-400 font-normal bangla-text text-xs">({item.meaning})</span>
           </span>
         ))}
       </div>
