@@ -1,0 +1,147 @@
+
+import type { Word } from '../types';
+
+// NOTE: This is a sample list of 20 words to demonstrate the functionality. 
+// For a production app, this would be expanded to 100+ words as requested.
+export const starterWords: Word[] = [
+  {
+    word: "Ubiquitous",
+    meaning_bangla: "সর্বব্যাপী",
+    synonyms: [ { word: "Omnipresent", meaning: "সর্বত্র বিদ্যমান" }, { word: "Pervasive", meaning: "ব্যাপক" }, { word: "Everywhere", meaning: "সবখানে" }, ],
+    antonyms: [ { word: "Rare", meaning: "দুর্লভ" }, { word: "Scarce", meaning: "অপ্রচুর" }, { word: "Limited", meaning: "সীমিত" }, ],
+    examples: [ "Smartphones have become ubiquitous in modern society.", "The company's logo is ubiquitous.", "His ubiquitous presence in the media made him a household name.", "Coffee shops are ubiquitous in the city.", "The sound of traffic is ubiquitous in New York." ],
+  },
+  {
+    word: "Ephemeral",
+    meaning_bangla: "ক্ষণস্থায়ী",
+    synonyms: [ { word: "Transitory", meaning: "অস্থায়ী" }, { word: "Fleeting", meaning: "ক্ষণজীবী" }, { word: "Short-lived", meaning: "স্বল্পস্থায়ী" }, ],
+    antonyms: [ { word: "Permanent", meaning: "স্থায়ী" }, { word: "Enduring", meaning: "দীর্ঘস্থায়ী" }, { word: "Everlasting", meaning: "চিরস্থায়ী" }, ],
+    examples: [ "The beauty of the cherry blossoms is ephemeral.", "Fame in the world of pop music can be ephemeral.", "He had an ephemeral moment of happiness.", "Their romance was beautiful but ephemeral.", "Fashion trends are often ephemeral." ],
+  },
+  {
+    word: "Meticulous",
+    meaning_bangla: "অতি সতর্ক",
+    synonyms: [ { word: "Careful", meaning: "সতর্ক" }, { word: "Precise", meaning: "নির্ভুল" }, { word: "Thorough", meaning: "পুঙ্খানুপুঙ্খ" }, ],
+    antonyms: [ { word: "Careless", meaning: "অসতর্ক" }, { word: "Sloppy", meaning: "অগোছালো" }, { word: "Negligent", meaning: "অবহেলাকারী" }, ],
+    examples: [ "She is meticulous in her record-keeping.", "The painter was meticulous about every detail of the portrait.", "He is a meticulous planner.", "The project requires meticulous attention to detail.", "The doctor conducted a meticulous examination." ],
+  },
+  {
+    word: "Cacophony",
+    meaning_bangla: "কর্কশ শব্দ",
+    synonyms: [ { word: "Dissonance", meaning: "বেসুর" }, { word: "Noise", meaning: "গোলমাল" }, { word: "Clamor", meaning: "কোলাহল" }, ],
+    antonyms: [ { word: "Harmony", meaning: "সুরের মিল" }, { word: "Euphony", meaning: "শ্রুতিমধুর শব্দ" }, { word: "Quiet", meaning: "শান্ত" }, ],
+    examples: [ "The city market was a cacophony of sounds.", "He woke up to the cacophony of construction work.", "The orchestra produced a cacophony during rehearsal.", "A cacophony of car horns filled the air.", "The birds created a morning cacophony." ],
+  },
+  {
+    word: "Lethargic",
+    meaning_bangla: "অলস",
+    synonyms: [ { word: "Sluggish", meaning: "মন্থর" }, { word: "Apathetic", meaning: "উদাসীন" }, { word: "Listless", meaning: "প্রাণহীন" }, ],
+    antonyms: [ { word: "Energetic", meaning: "কর্মশক্তিপূর্ণ" }, { word: "Active", meaning: "সক্রিয়" }, { word: "Vigorous", meaning: "বলিষ্ঠ" }, ],
+    examples: [ "The hot weather made everyone feel lethargic.", "He felt too lethargic to get out of bed.", "A lack of sleep can make you lethargic.", "The medicine had a lethargic effect on him.", "After the big meal, I felt lethargic." ],
+  },
+  {
+    word: "Precipitate",
+    meaning_bangla: "ত্বরান্বিত করা",
+    synonyms: [ { word: "Hasten", meaning: "তাড়াতাড়ি করা" }, { word: "Accelerate", meaning: "গতিবৃদ্ধি করা" }, { word: "Trigger", meaning: "ঘটানো" } ],
+    antonyms: [ { word: "Delay", meaning: "বিলম্ব করা" }, { word: "Hinder", meaning: "বাধা দেওয়া" }, { word: "Prevent", meaning: "প্রতিরোধ করা" } ],
+    examples: [ "The crisis was precipitated by the country's economic collapse.", "His rash decision precipitated a disaster.", "Don't be precipitate in your decisions.", "The argument precipitated a fight.", "A lack of planning can precipitate failure." ],
+  },
+  {
+    word: "Ambiguous",
+    meaning_bangla: "দ্ব্যর্থক",
+    synonyms: [ { word: "Unclear", meaning: "অস্পষ্ট" }, { word: "Vague", meaning: "অনির্দিষ্ট" }, { word: "Equivocal", meaning: "দ্ব্যর্থক" } ],
+    antonyms: [ { word: "Clear", meaning: "স্পষ্ট" }, { word: "Precise", meaning: "নির্ভুল" }, { word: "Unambiguous", meaning: "সুস্পষ্ট" } ],
+    examples: [ "The instructions were ambiguous, leading to confusion.", "His reply was ambiguous.", "The ending of the film was deliberately ambiguous.", "The law is ambiguous on this point.", "She gave an ambiguous smile." ],
+  },
+  {
+    word: "Garrulous",
+    meaning_bangla: "বাচাল",
+    synonyms: [ { word: "Talkative", meaning: "কথাবার্তাপ্রিয়" }, { word: "Loquacious", meaning: "বাকপটু" }, { word: "Chatty", meaning: "গল্পবাজ" } ],
+    antonyms: [ { word: "Taciturn", meaning: "স্বল্পভাষী" }, { word: "Reticent", meaning: "সংযত" }, { word: "Quiet", meaning: "শান্ত" } ],
+    examples: [ "The garrulous old man told us his life story.", "He became more garrulous after a few drinks.", "I had to sit next to a garrulous passenger on the bus.", "She was so garrulous I could hardly get a word in.", "He's a garrulous but charming host." ],
+  },
+  {
+    word: "Anomalous",
+    meaning_bangla: "ব্যতিক্রমী",
+    synonyms: [ { word: "Abnormal", meaning: "অস্বাভাবিক" }, { word: "Atypical", meaning: "অপ্রচলিত" }, { word: "Irregular", meaning: "অনিয়মিত" } ],
+    antonyms: [ { word: "Normal", meaning: "স্বাভাবিক" }, { word: "Typical", meaning: "সাধারণ" }, { word: "Regular", meaning: "নিয়মিত" } ],
+    examples: [ "The scientist found an anomalous result in the experiment.", "His behavior was anomalous for him.", "This anomalous weather is due to climate change.", "The anomalous data point was excluded from the analysis.", "It was an anomalous situation." ],
+  },
+  {
+    word: "Esoteric",
+    meaning_bangla: "দুর্জ্ঞেয়",
+    synonyms: [ { word: "Obscure", meaning: "অস্পষ্ট" }, { word: "Arcane", meaning: "রহস্যময়" }, { word: "Abstruse", meaning: "দুর্বোধ্য" } ],
+    antonyms: [ { word: "Simple", meaning: "সরল" }, { word: "Common", meaning: "সাধারণ" }, { word: "Familiar", meaning: "পরিচিত" } ],
+    examples: [ "He has an esoteric collection of old books.", "The professor's lecture was too esoteric for most students.", "They were having an esoteric conversation about philosophy.", "It's an esoteric taste.", "The film is full of esoteric references." ],
+  },
+  {
+    word: "Incongruous",
+    meaning_bangla: "বেমানান",
+    synonyms: [{ word: "Inappropriate", meaning: "অনুপযুক্ত" }, { word: "Unsuitable", meaning: "অনুপযোগী" }, { word: "Out of place", meaning: "অপ্রাসঙ্গিক" }],
+    antonyms: [{ word: "Compatible", meaning: "সামঞ্জস্যপূর্ণ" }, { word: "Harmonious", meaning: "সুরেলা" }, { word: "Fitting", meaning: "উপযুক্ত" }],
+    examples: [ "The modern building looked incongruous in the ancient city.", "There was an incongruous mix of styles in the room.", "His cheerful smile was incongruous with the sad news.", "Her casual clothes were incongruous at the formal event.", "The painting's bright colors felt incongruous." ],
+  },
+  {
+    word: "Juxtaposition",
+    meaning_bangla: "পাশাপাশি স্থাপন",
+    synonyms: [{ word: "Proximity", meaning: "নৈকট্য" }, { word: "Comparison", meaning: "তুলনা" }, { word: "Collocation", meaning: "সহাবস্থান" }],
+    antonyms: [{ word: "Separation", meaning: "বিচ্ছেদ" }, { word: "Distance", meaning: "দূরত্ব" }, { word: "Remoteness", meaning: "দূরবর্তীতা" }],
+    examples: [ "The juxtaposition of old and new architecture was striking.", "The film uses the juxtaposition of comedy and tragedy.", "The artist's work is about the juxtaposition of different cultures.", "This juxtaposition highlights their differences.", "Consider the juxtaposition of these two images." ],
+  },
+  {
+    word: "Ostentatious",
+    meaning_bangla: "জাঁকজমকপূর্ণ",
+    synonyms: [{ word: "Showy", meaning: "লোক দেখানো" }, { word: "Pretentious", meaning: "ভণ্ড" }, { word: "Flamboyant", meaning: "জমকালো" }],
+    antonyms: [{ word: "Modest", meaning: "বিনীত" }, { word: "Plain", meaning: "সাধারণ" }, { word: "Reserved", meaning: "সংরক্ষিত" }],
+    examples: [ "He bought an ostentatious car to show off his wealth.", "She wore an ostentatious diamond necklace.", "Their house is very ostentatious.", "He is known for his ostentatious lifestyle.", "I find his behavior ostentatious." ],
+  },
+  {
+    word: "Paradox",
+    meaning_bangla: "আপাতদৃষ্টিতে স্ববিরোধী",
+    synonyms: [{ word: "Contradiction", meaning: "বৈপরীত্য" }, { word: "Inconsistency", meaning: "অসঙ্গতি" }, { word: "Anomaly", meaning: "ব্যতিক্রম" }],
+    antonyms: [{ word: "Normality", meaning: "স্বাভাবিকতা" }, { word: "Consistency", meaning: "সামঞ্জস্য" }, { word: "Logic", meaning: "যুক্তি" }],
+    examples: [ "It is a paradox that computers need maintenance so often.", "He was a paradox - a lazy man of great talent.", "The paradox is that the more you learn, the less you know.", "'Less is more' is a famous paradox.", "She enjoys solving logical paradoxes." ],
+  },
+  {
+    word: "Quixotic",
+    meaning_bangla: "অবাস্তব",
+    synonyms: [{ word: "Idealistic", meaning: "ভাববাদী" }, { word: "Impractical", meaning: "অবাস্তব" }, { word: "Unrealistic", meaning: "অবাস্তব" }],
+    antonyms: [{ word: "Practical", meaning: "বাস্তবসম্মত" }, { word: "Realistic", meaning: "বাস্তববাদী" }, { word: "Pragmatic", meaning: "বাস্তববাদী" }],
+    examples: [ "He had a quixotic plan to end world poverty.", "It was a quixotic quest.", "His quixotic nature often led him into trouble.", "She has a quixotic view of love.", "The project was dismissed as quixotic." ],
+  },
+  {
+    word: "Reticent",
+    meaning_bangla: "স্বল্পভাষী",
+    synonyms: [{ word: "Reserved", meaning: "সংরক্ষিত" }, { word: "Taciturn", meaning: "স্বল্পভাষী" }, { word: "Introverted", meaning: "অন্তর্মুখী" }],
+    antonyms: [{ word: "Garrulous", meaning: "বাচাল" }, { word: "Talkative", meaning: "কথাবার্তাপ্রিয়" }, { word: "Outgoing", meaning: "বহির্মুখী" }],
+    examples: [ "He is very reticent about his personal life.", "She was reticent to talk about her past.", "The usually reticent man surprised everyone by speaking up.", "He is naturally reticent.", "Why are you being so reticent?" ],
+  },
+  {
+    word: "Superfluous",
+    meaning_bangla: "অনাবশ্যক",
+    synonyms: [{ word: "Unnecessary", meaning: "অপ্রয়োজনীয়" }, { word: "Excess", meaning: "অতিরিক্ত" }, { word: "Redundant", meaning: "পুনরুক্ত" }],
+    antonyms: [{ word: "Necessary", meaning: "প্রয়োজনীয়" }, { word: "Essential", meaning: "অপরিহার্য" }, { word: "Required", meaning: "আবশ্যক" }],
+    examples: [ "Much of the information in the report was superfluous.", "He removed the superfluous details.", "Her long introduction felt superfluous.", "It's a superfluous expense we cannot afford.", "Avoid using superfluous words in your writing." ],
+  },
+  {
+    word: "Taciturn",
+    meaning_bangla: "স্বল্পভাষী",
+    synonyms: [{ word: "Reticent", meaning: "সংযত" }, { word: "Silent", meaning: "নীরব" }, { word: "Uncommunicative", meaning: "অমিশুক" }],
+    antonyms: [{ word: "Talkative", meaning: "কথাবার্তাপ্রিয়" }, { word: "Garrulous", meaning: "বাচাল" }, { word: "Loquacious", meaning: "বাকপটু" }],
+    examples: [ "The old farmer was a taciturn man who spoke little.", "He is known for his taciturn nature.", "She was taciturn in the meeting.", "He remained taciturn throughout the dinner.", "A taciturn person is not necessarily unfriendly." ],
+  },
+  {
+    word: "Veracity",
+    meaning_bangla: "সত্যবাদিতা",
+    synonyms: [{ word: "Truthfulness", meaning: "সত্যবাদিতা" }, { word: "Accuracy", meaning: "নির্ভুলতা" }, { word: "Honesty", meaning: "সততা" }],
+    antonyms: [{ word: "Deceit", meaning: "প্রতারণা" }, { word: "Falsity", meaning: "মিথ্যা" }, { word: "Dishonesty", meaning: "অসততা" }],
+    examples: [ "The police questioned the veracity of his statement.", "We have no reason to doubt the veracity of her story.", "The veracity of the claims has been confirmed.", "He is a man of unquestionable veracity.", "The newspaper is known for its veracity." ],
+  },
+  {
+    word: "Zealot",
+    meaning_bangla: "অন্ধবিশ্বাসী",
+    synonyms: [{ word: "Fanatic", meaning: "ধর্মান্ধ" }, { word: "Extremist", meaning: "চরমপন্থী" }, { word: "Radical", meaning: "মৌলবাদী" }],
+    antonyms: [{ word: "Moderate", meaning: "মধ্যপন্থী" }, { word: "Skeptic", meaning: "সন্দেহবাদী" }, { word: "Tory", meaning: "রক্ষণশীল" }],
+    examples: [ "He was a religious zealot who refused to tolerate other beliefs.", "The political zealot was difficult to reason with.", "She is a zealot when it comes to animal rights.", "Don't be such a zealot about it.", "The zealots were willing to die for their cause." ],
+  }
+];

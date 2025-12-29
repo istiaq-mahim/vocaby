@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vocaby - English for Bangladesh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable dark mode
+        theme: {
+          extend: {
+            colors: {
+              primary: '#0052CC',
+              secondary: '#F4F5F7',
+              accent: '#4C9AFF',
+              textDark: '#172B4D',
+              textLight: '#5E6C84',
+            },
+            keyframes: {
+              'fade-in': {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              'fade-in-up': {
+                '0%': {
+                  opacity: '0',
+                  transform: 'translateY(1rem)'
+                },
+                '100%': {
+                  opacity: '1',
+                  transform: 'translateY(0)'
+                },
+              },
+            },
+            animation: {
+              'fade-in': 'fade-in 0.5s ease-out forwards',
+              'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      .background-animation {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        overflow: hidden;
+        background: #F4F5F7;
+      }
+      html.dark .background-animation {
+        background: #111827; /* dark gray */
+      }
+
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.6;
+      }
+      html.dark .blob {
+        opacity: 0.4;
+      }
+
+      .blob-1 {
+        width: 300px;
+        height: 300px;
+        background: rgba(0, 82, 204, 0.3); /* primary color */
+        top: -50px;
+        left: -100px;
+        animation: move 25s infinite alternate;
+      }
+
+      .blob-2 {
+        width: 350px;
+        height: 350px;
+        background: rgba(76, 154, 255, 0.3); /* accent color */
+        bottom: -80px;
+        right: -120px;
+        animation: move 30s infinite alternate-reverse;
+      }
+       .blob-3 {
+        width: 250px;
+        height: 250px;
+        background: rgba(0, 82, 204, 0.2);
+        bottom: 50px;
+        left: -150px;
+        animation: move 20s infinite alternate;
+      }
+
+      @keyframes move {
+        from {
+          transform: translate(0, 0) rotate(0deg);
+        }
+        to {
+          transform: translate(100px, 50px) rotate(180deg);
+        }
+      }
+
+      /* Reading Mode Style */
+      html.reading-mode #root {
+        transition: filter 0.3s ease-in-out;
+        filter: sepia(0.35) brightness(0.95);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div class="background-animation">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
