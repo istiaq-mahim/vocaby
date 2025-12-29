@@ -56,12 +56,12 @@ const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
         <Section title="Synonyms" items={wordData.synonyms} />
         <Section title="Antonyms" items={wordData.antonyms} />
         
-        <div className="pt-4 border-t border-slate-50 dark:border-gray-700">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Examples</h4>
+        <div className="pt-6 border-t border-slate-50 dark:border-gray-700">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Sentence Examples</h4>
           <div className="grid grid-cols-1 gap-4">
             {wordData.examples.slice(0, 4).map((ex, i) => (
               <div key={i} className="flex gap-4 group">
-                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300 text-[10px] font-black">
+                <span className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300 text-xs font-black">
                   {i + 1}
                 </span>
                 <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed italic group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
@@ -83,8 +83,8 @@ const Section: React.FC<{title: string, items: SynonymAntonym[]}> = ({title, ite
       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">{title}</h4>
       <div className="flex flex-wrap gap-2">
         {items.slice(0, 3).map((item, i) => (
-          <span key={i} className="px-4 py-2 bg-slate-50 dark:bg-gray-700 rounded-2xl text-sm font-medium border border-slate-100 dark:border-gray-600 flex items-center gap-2 transition-all hover:border-primary/40 hover:bg-white">
-            <span className="text-[#0052CC] dark:text-blue-300 font-bold">{item.word}</span>
+          <span key={i} className="px-4 py-2 bg-slate-50 dark:bg-gray-700 rounded-2xl text-sm font-medium border border-slate-100 dark:border-gray-600 flex items-center gap-2 transition-all hover:border-primary/40 hover:bg-white hover:scale-105">
+            <span className="text-[#0052CC] dark:text-blue-300 font-black">{item.word}</span>
             <span className="text-slate-500 dark:text-gray-400 font-normal bangla-text text-xs">({item.meaning})</span>
           </span>
         ))}

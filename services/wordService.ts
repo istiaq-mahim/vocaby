@@ -6,51 +6,54 @@ import { starterWords } from '../data/starterWords';
 const WORD_POOL_KEY = 'vocaby_word_pool';
 const RANDOM_OFFSET_KEY = 'vocaby_user_random_offset';
 
+/**
+ * Gets daily words from a local pool to ensure instant loading.
+ * Shuffles the pool to provide a random selection for each request.
+ */
 export const getDailyWords = async (count: number, user: any): Promise<Word[]> => {
-    // 1. Get or generate a persistent random offset for this user (-1, 0, or +1)
+    // 1. Manage persistent user randomization offset (-1, 0, +1)
     let offset = localStorage.getItem(RANDOM_OFFSET_KEY);
     if (offset === null) {
-      const newOffset = Math.floor(Math.random() * 3) - 1; // -1 to 1
+      const newOffset = Math.floor(Math.random() * 3) - 1;
       localStorage.setItem(RANDOM_OFFSET_KEY, newOffset.toString());
       offset = newOffset.toString();
     }
-    
     const adjustedCount = Math.max(3, count + parseInt(offset));
 
-    // 2. Try to get words from the local pool first (instant loading)
+    // 2. Access local word pool
     let pool: Word[] = JSON.parse(localStorage.getItem(WORD_POOL_KEY) || '[]');
     
-    // 3. If pool is empty or too small, ensure we have at least starter words
+    // 3. Populate pool if empty using starter words
     if (pool.length < adjustedCount) {
-        // Merge in starter words if pool is low and we haven't used them
         const usedWords = new Set(pool.map(w => w.word));
         const unusedStarters = starterWords.filter(w => !usedWords.has(w.word));
         pool = [...pool, ...unusedStarters];
     }
 
-    // 4. Take requested amount from pool
-    const selected = pool.splice(0, adjustedCount);
-    localStorage.setItem(WORD_POOL_KEY, JSON.stringify(pool));
+    // 4. Randomly select words from the pool to simulate different user experiences
+    const selected: Word[] = [];
+    const poolCopy = [...pool];
+    
+    for (let i = 0; i < Math.min(adjustedCount, poolCopy.length); i++) {
+        const randomIndex = Math.floor(Math.random() * poolCopy.length);
+        selected.push(poolCopy.splice(randomIndex, 1)[0]);
+    }
+    
+    // 5. Update pool in storage (removing selected words)
+    localStorage.setItem(WORD_POOL_KEY, JSON.stringify(poolCopy));
 
-    // 5. Background Refresh: If pool is getting low (less than 15), fetch more from AI silently
-    if (pool.length < 15) {
+    // 6. Background Maintenance: Silent fetch of 30 new words when pool is low
+    if (poolCopy.length < 15) {
         fetchDailyWords(30).then(newWords => {
             const currentPool: Word[] = JSON.parse(localStorage.getItem(WORD_POOL_KEY) || '[]');
             const updatedPool = [...currentPool, ...newWords];
-            // Filter duplicates
+            // Remove duplicates
             const uniquePool = Array.from(new Map(updatedPool.map(w => [w.word, w])).values());
             localStorage.setItem(WORD_POOL_KEY, JSON.stringify(uniquePool));
-        }).catch(err => console.error("Silent background fetch failed", err));
+        }).catch(err => console.debug("Silent fetch failed, will retry on next check", err));
     }
 
-    // Return the selected words immediately
-    if (selected.length > 0) {
-        return selected.map(w => ({ ...w, isAiGenerated: true }));
-    }
-
-    // Ultimate Fallback
-    const fallback = await fetchDailyWords(adjustedCount);
-    return fallback.map(w => ({ ...w, isAiGenerated: true }));
+    return selected.map(w => ({ ...w, isAiGenerated: true }));
 };
 
 export const clearDailyCache = () => {
