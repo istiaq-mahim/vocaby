@@ -1,16 +1,29 @@
 
 import type { Word } from '../types';
+import { fetchDailyWords } from './geminiService';
 
-export const getDailyWords = async (count: number): Promise<Word[]> => {
+export const getDailyWords = async (count: number, user: { isGuest?: boolean; email: string }): Promise<Word[]> => {
+    // If user is a Guest, bypass the authenticated backend API and use Gemini directly from the browser
+    if (user.isGuest) {
+        console.log("Guest Mode: Generating words client-side...");
+        try {
+            const words = await fetchDailyWords(count);
+            return words.map(w => ({ ...w, isAiGenerated: true }));
+        } catch (error) {
+            console.error("Client-side generation failed:", error);
+            throw error;
+        }
+    }
+
+    // Attempt to hit the backend for logged-in users
     try {
         const response = await fetch('/api/words', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: 'user123', count })
+            body: JSON.stringify({ userId: user.email, count })
         });
 
         if (response.status === 401) {
-            // This will trigger the app to show the Landing page
             throw new Error("UNAUTHORIZED");
         }
 
@@ -20,8 +33,10 @@ export const getDailyWords = async (count: number): Promise<Word[]> => {
         
         return data.words.map((w: Word) => ({ ...w, isAiGenerated: true }));
     } catch (error) {
-        console.error("Fetch failed:", error);
-        throw error;
+        console.warn("Backend fetch failed, falling back to client-side generation...", error);
+        // Secondary fallback for authenticated users if their backend is down
+        const words = await fetchDailyWords(count);
+        return words.map(w => ({ ...w, isAiGenerated: true }));
     }
 };
 
