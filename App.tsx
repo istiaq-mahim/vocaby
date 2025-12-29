@@ -4,78 +4,42 @@ import DailyWords from './components/DailyWords';
 import VocabularyList from './components/VocabularyList';
 import BottomNav from './components/BottomNav';
 import SettingsPanel from './components/SettingsPanel';
-import LandingPage from './components/LandingPage';
 import AccountView from './components/AccountView';
 import { View } from './types';
 import type { Word, Settings, LearnedWord } from './types';
 import Review from './components/Review';
 import ManualAdd from './components/ManualAdd';
+import { VOCABULARY_KEY, SETTINGS_KEY } from './constants';
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<{ user: { name: string; email: string; isGuest?: boolean } } | null>(null);
-  const [settings, setSettings] = useState<Settings>({
-    wordCount: 5,
-    notificationHour: 8,
-    notificationMinute: 0,
-    darkMode: false,
-    readingMode: false
+  const [settings, setSettings] = useState<Settings>(() => {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    return saved ? JSON.parse(saved) : {
+      wordCount: 5,
+      notificationHour: 8,
+      notificationMinute: 0,
+      darkMode: false,
+      readingMode: false
+    };
   });
   
-  const [vocabulary, setVocabulary] = useState<LearnedWord[]>([]);
+  const [vocabulary, setVocabulary] = useState<LearnedWord[]>(() => {
+    const saved = localStorage.getItem(VOCABULARY_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [activeView, setActiveView] = useState<View>(View.DAILY);
-  const [isReady, setIsReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-        try {
-            const savedGuest = localStorage.getItem('vocaby_guest_session');
-            if (savedGuest) {
-              setSession(JSON.parse(savedGuest));
-              setIsReady(true);
-              return;
-            }
-
-            const res = await fetch('/api/words'); 
-            if (res.ok) {
-                const data = await res.json();
-                setSession({ user: { name: "IELTS Candidate", email: "candidate@vocaby.bd" } });
-                const formatted = data.map((item: any) => ({
-                    ...item.word_data,
-                    srsLevel: item.srs_level,
-                    nextReview: item.next_review,
-                    learnedOn: item.learned_on || new Date().toISOString().split('T')[0]
-                }));
-                setVocabulary(formatted);
-            } else {
-                setActiveView(View.LANDING);
-            }
-        } catch (e) {
-            setActiveView(View.LANDING);
-        } finally {
-            setIsReady(true);
-        }
-    };
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     if (settings.darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
-  }, [settings.darkMode]);
+  }, [settings]);
 
-  const handleGuestLogin = () => {
-    const guestUser = { user: { name: "Guest Student", email: "guest@vocaby.local", isGuest: true } };
-    setSession(guestUser);
-    localStorage.setItem('vocaby_guest_session', JSON.stringify(guestUser));
-    setActiveView(View.DAILY);
-  };
-
-  const handleSignOut = () => {
-    localStorage.removeItem('vocaby_guest_session');
-    setSession(null);
-    setActiveView(View.LANDING);
-  };
+  useEffect(() => {
+    localStorage.setItem(VOCABULARY_KEY, JSON.stringify(vocabulary));
+  }, [vocabulary]);
 
   const addWordsToVocabulary = useCallback((newWords: Word[]) => {
     setVocabulary(prev => {
@@ -92,130 +56,85 @@ const App: React.FC = () => {
     });
   }, []);
 
+  const updateWordSrs = useCallback((word: LearnedWord, newSrsData: { srsLevel: number; nextReview: string }) => {
+    setVocabulary(prev => prev.map(w => 
+      w.word === word.word ? { ...w, ...newSrsData } : w
+    ));
+  }, []);
+
   const reviewCount = useMemo(() => {
       const today = new Date().toISOString().split('T')[0];
       return vocabulary.filter(word => (word.nextReview || '9999-12-31') <= today).length;
   }, [vocabulary]);
 
-  if (!isReady) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-6">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="font-display text-xl font-bold text-primary animate-pulse tracking-tight">Vocaby is loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (activeView === View.LANDING || !session) {
-    return <LandingPage onLogin={() => window.location.href = '/api/auth/signin'} onGuestLogin={handleGuestLogin} />;
-  }
-
   return (
-    <div className={`min-h-screen font-sans ${settings.darkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
-      
-      {/* Decorative Background */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[5%] right-[-5%] w-[30%] h-[30%] bg-accent/5 rounded-full blur-[100px]"></div>
-      </div>
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* Simple Header */}
+      <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg"></div>
+          <h1 className="text-xl font-extrabold tracking-tight text-primary">VOCABY</h1>
+        </div>
+        <button 
+          onClick={() => setActiveView(View.ACCOUNT)}
+          className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm font-bold"
+        >
+          👤
+        </button>
+      </header>
 
-      <div className="flex flex-col md:flex-row min-h-screen max-w-screen-2xl mx-auto">
-        
-        {/* Sidebar (Desktop) - Strictly 3 main nav items + Profile at bottom */}
-        <aside className="hidden md:flex md:w-80 p-8 flex-col shrink-0 sticky top-0 h-screen border-r border-slate-100 dark:border-slate-800">
-          <div className="mb-12">
-            <h1 className="text-4xl font-display font-black text-primary tracking-tighter">VOCABY</h1>
-            <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-[0.2em]">Bangladesh Edition</p>
-          </div>
-          
-          <nav className="flex flex-col gap-3 w-full">
-            <SidebarBtn active={activeView === View.DAILY} onClick={() => setActiveView(View.DAILY)} icon="✨" label="Daily Words" />
-            <SidebarBtn 
-                active={activeView === View.REVIEW} 
-                onClick={() => setActiveView(View.REVIEW)} 
-                icon="🔄" 
-                label="Revision" 
-                badge={reviewCount} 
+      {/* Main Content */}
+      <main className="flex-grow p-4 max-w-2xl mx-auto w-full pb-24">
+        <div className="animate-in">
+          {activeView === View.DAILY && (
+            <DailyWords 
+              settings={settings} 
+              addWordsToVocabulary={addWordsToVocabulary} 
+              user={{ name: 'Student', email: 'local', isGuest: true }} 
             />
-            <SidebarBtn active={activeView === View.VOCABULARY} onClick={() => setActiveView(View.VOCABULARY)} icon="📚" label="My Journal" />
-          </nav>
+          )}
+          {activeView === View.REVIEW && (
+            <Review 
+              vocabulary={vocabulary} 
+              updateWordSrs={updateWordSrs} 
+            />
+          )}
+          {activeView === View.VOCABULARY && (
+            <VocabularyList 
+              vocabulary={vocabulary} 
+              learningLog={{}} 
+            />
+          )}
+          {activeView === View.ACCOUNT && (
+            <AccountView 
+              session={{ user: { name: 'Local Student', email: 'local-mode' } }} 
+              vocabulary={vocabulary} 
+              onSignOut={() => {}} 
+              onOpenSettings={() => setIsSettingsOpen(true)} 
+            />
+          )}
+          {activeView === View.MANUAL_ADD && (
+            <ManualAdd addWordsToVocabulary={addWordsToVocabulary} />
+          )}
+        </div>
+      </main>
 
-          <div className="mt-auto space-y-4 pt-8 border-t border-slate-100 dark:border-slate-800">
-            <button 
-                onClick={() => setActiveView(View.ACCOUNT)}
-                className={`flex items-center gap-3 w-full p-4 rounded-2xl transition-all font-bold ${activeView === View.ACCOUNT ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
-            >
-                <div className="w-10 h-10 rounded-xl card-gradient flex items-center justify-center text-white font-black">
-                    {session.user.name.charAt(0)}
-                </div>
-                <div className="text-left">
-                    <p className="text-sm font-bold truncate">{session.user.name}</p>
-                    <p className="text-[10px] opacity-40 truncate">View Profile</p>
-                </div>
-            </button>
-            <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-3 w-full p-4 rounded-xl text-slate-400 hover:text-primary transition-colors font-bold text-sm">
-                <span>⚙️</span> Settings
-            </button>
-          </div>
-        </aside>
-
-        {/* Top Header (Mobile) */}
-        <header className="md:hidden flex justify-between items-center p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg card-gradient shadow-md"></div>
-                <h1 className="text-2xl font-display font-black text-primary tracking-tighter">VOCABY</h1>
-            </div>
-            <button 
-              onClick={() => setActiveView(View.ACCOUNT)} 
-              className={`w-10 h-10 rounded-full border-2 transition-all p-0.5 overflow-hidden ${activeView === View.ACCOUNT ? 'border-primary' : 'border-primary/20'}`}
-            >
-                <div className="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-primary">
-                    {session.user.name.charAt(0)}
-                </div>
-            </button>
-        </header>
-
-        {/* Main Content Area */}
-        <main className="flex-grow p-4 md:p-12 pb-32 md:pb-12">
-          <div className="max-w-4xl mx-auto">
-            {activeView === View.DAILY && <DailyWords settings={settings} addWordsToVocabulary={addWordsToVocabulary} user={session.user as any} />}
-            {activeView === View.REVIEW && <Review vocabulary={vocabulary} updateWordSrs={() => {}} />}
-            {activeView === View.VOCABULARY && <VocabularyList vocabulary={vocabulary} learningLog={{}} />}
-            {activeView === View.ACCOUNT && <AccountView session={session as any} vocabulary={vocabulary} onSignOut={handleSignOut} onOpenSettings={() => setIsSettingsOpen(true)} />}
-            {activeView === View.MANUAL_ADD && <ManualAdd addWordsToVocabulary={addWordsToVocabulary} />}
-          </div>
-        </main>
-      </div>
-
-      {/* Mobile Nav - Strictly 3 Items as requested */}
+      {/* Navigation */}
       <BottomNav 
-          activeView={activeView} 
-          setActiveView={setActiveView} 
-          reviewCount={reviewCount}
+        activeView={activeView} 
+        setActiveView={setActiveView} 
+        reviewCount={reviewCount} 
       />
 
       {isSettingsOpen && (
         <SettingsPanel 
-            settings={settings} 
-            updateSettings={(s) => setSettings(prev => ({ ...prev, ...s }))} 
-            onClose={() => setIsSettingsOpen(false)} 
+          settings={settings} 
+          updateSettings={(s) => setSettings(prev => ({ ...prev, ...s }))} 
+          onClose={() => setIsSettingsOpen(false)} 
         />
       )}
     </div>
   );
 };
-
-const SidebarBtn: React.FC<{active: boolean, onClick: () => void, icon: string, label: string, badge?: number}> = ({active, onClick, icon, label, badge}) => (
-    <button 
-        onClick={onClick} 
-        className={`flex items-center gap-4 w-full p-4 rounded-2xl transition-all font-bold ${active ? 'bg-primary text-white shadow-xl shadow-primary/30' : 'hover:bg-primary/10 text-slate-500 dark:text-slate-400'}`}
-    >
-        <span className="text-xl">{icon}</span>
-        <span className="flex-grow text-left">{label}</span>
-        {badge && badge > 0 && <span className={`px-2 py-0.5 rounded-full text-[10px] ${active ? 'bg-white text-primary' : 'bg-accent text-white'}`}>{badge}</span>}
-    </button>
-);
 
 export default App;

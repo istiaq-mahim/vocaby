@@ -8,7 +8,7 @@
     <title>Vocaby - English for Bangladesh</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -17,89 +17,26 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
-              display: ['Outfit', 'sans-serif'],
             },
             colors: {
-              primary: {
-                DEFAULT: '#4F46E5',
-                dark: '#4338CA',
-                light: '#818CF8',
-              },
+              primary: '#4F46E5',
+              secondary: '#F3F4F6',
               accent: '#F43F5E',
-              surface: '#FFFFFF',
-              background: '#F8FAFC',
-            },
-            borderRadius: {
-              '3xl': '1.5rem',
-              '4xl': '2rem',
-            },
-            animation: {
-              'subtle-float': 'float 6s ease-in-out infinite',
-              'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-              'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
-            },
-            keyframes: {
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-10px)' },
-              },
-              slideUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              pulseSoft: {
-                '0%, 100%': { opacity: '1' },
-                '50%': { opacity: '0.8' },
-              }
             }
           },
         },
       }
     </script>
     <style>
-      body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
-      .font-display { font-family: 'Outfit', sans-serif; }
+      body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+      .dark body { background-color: #111827; }
       
-      .glass {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+      /* Simple slide up animation for content */
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-      
-      .dark .glass {
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-      }
-
-      .card-gradient {
-        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-      }
-
-      .text-glow {
-        text-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
-      }
-
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar { width: 5px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
-      html.dark ::-webkit-scrollbar-thumb { background: #334155; }
-
-      /* Flashcard Flip CSS */
-      .flip-card { perspective: 1000px; background-color: transparent; }
-      .flip-card-inner {
-        position: relative; width: 100%; height: 100%;
-        text-align: center; transition: transform 0.6s;
-        transform-style: preserve-3d;
-      }
-      .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
-      .flip-card-front, .flip-card-back {
-        position: absolute; width: 100%; height: 100%;
-        -webkit-backface-visibility: hidden; backface-visibility: hidden;
-        border-radius: 1.5rem;
-      }
-      .flip-card-back { transform: rotateY(180deg); }
+      .animate-in { animation: slideUp 0.4s ease-out forwards; }
     </style>
   <script type="importmap">
 {
@@ -112,13 +49,13 @@
     "vite": "https://esm.sh/vite@^7.3.0",
     "next/": "https://esm.sh/next@^16.1.1/",
     "next-auth/": "https://esm.sh/next-auth@^4.24.13/",
-    "next-auth": "https://esm.sh/next-auth@^4.24.13",
-    "pg": "https://esm.sh/pg@^8.16.3"
+    "pg": "https://esm.sh/pg@^8.16.3",
+    "next-auth": "https://esm.sh/next-auth@^4.24.13"
   }
 }
 </script>
 </head>
-  <body class="bg-background dark:bg-slate-950">
+  <body class="text-slate-900 dark:text-slate-100">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
