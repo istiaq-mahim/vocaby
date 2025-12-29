@@ -10,7 +10,6 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [wordCount, setWordCount] = useState<number>(10);
   const [notificationTime, setNotificationTime] = useState('08:00');
-  const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
 
   const wordOptions = [5, 10, 15, 20];
 
@@ -25,30 +24,24 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     });
   };
 
-  const handleRequestPermission = async () => {
-    const permission = await Notification.requestPermission();
-    setNotificationPermission(permission);
-    handleFinish(); // Finish onboarding regardless of permission status
-  };
-
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4 text-center">
-      <div className="max-w-md w-full">
-        {step < 3 && <h1 className="text-3xl font-bold text-primary mb-2">Welcome to Vocaby!</h1>}
-        {step < 3 && <p className="text-textLight dark:text-gray-400 mb-8">Let's set up your daily learning habit.</p>}
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center">
+      <div className="max-w-md w-full animate-in">
+        <h1 className="text-4xl font-extrabold text-[#0052CC] mb-3">Welcome to Vocaby!</h1>
+        <p className="text-slate-500 dark:text-gray-400 text-lg mb-12">Let's set up your daily learning habit.</p>
 
         {step === 1 && (
-          <div className="animate-fade-in">
-            <h2 className="text-xl font-semibold text-textDark dark:text-gray-200 mb-4">How many new words do you want to learn each day?</h2>
-            <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-gray-200 mb-8">How many new words do you want to learn each day?</h2>
+            <div className="grid grid-cols-2 gap-4 mb-16">
               {wordOptions.map(option => (
                 <button
                   key={option}
                   onClick={() => setWordCount(option)}
-                  className={`p-6 rounded-lg text-2xl font-bold transition-all duration-200 ${
+                  className={`py-8 rounded-xl text-3xl font-bold transition-all duration-300 ${
                     wordCount === option
-                      ? 'bg-primary text-white scale-105 shadow-lg'
-                      : 'bg-secondary text-textDark dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary text-white shadow-xl shadow-blue-200'
+                      : 'bg-slate-50 text-slate-800 dark:bg-gray-800 dark:text-gray-200 hover:bg-slate-100'
                   }`}
                 >
                   {option}
@@ -57,7 +50,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             </div>
             <button
               onClick={handleNext}
-              className="mt-10 w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full bg-primary text-white font-bold py-5 px-4 rounded-xl text-lg hover:bg-blue-700 transition-all shadow-lg"
             >
               Next
             </button>
@@ -65,19 +58,22 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
 
         {step === 2 && (
-          <div className="animate-fade-in">
-            <h2 className="text-xl font-semibold text-textDark dark:text-gray-200 mb-4">When should we remind you?</h2>
-            <div className="flex justify-center items-center gap-4">
-              <input
-                type="time"
-                value={notificationTime}
-                onChange={(e) => setNotificationTime(e.target.value)}
-                className="p-3 border rounded-lg bg-secondary dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 text-2xl w-48 text-center focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-gray-200 mb-8">When should we remind you?</h2>
+            <div className="flex justify-center items-center mb-16">
+              <div className="relative group">
+                <input
+                  type="time"
+                  value={notificationTime}
+                  onChange={(e) => setNotificationTime(e.target.value)}
+                  className="p-6 pr-12 border-none rounded-xl bg-slate-50 dark:bg-gray-800 dark:text-gray-200 text-3xl w-64 text-center font-bold focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all appearance-none"
+                />
+                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-2xl opacity-20 group-hover:opacity-40 pointer-events-none">🕒</span>
+              </div>
             </div>
              <button
               onClick={handleNext}
-              className="mt-10 w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full bg-primary text-white font-bold py-5 px-4 rounded-xl text-lg hover:bg-blue-700 transition-all shadow-lg"
             >
               Continue
             </button>
@@ -85,22 +81,22 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
 
         {step === 3 && (
-          <div className="animate-fade-in">
-            <h1 className="text-3xl font-bold text-primary mb-2">One Last Step</h1>
-            <p className="text-textLight dark:text-gray-400 mb-8">Enable notifications to get your daily learning reminders.</p>
-            <div className="bg-secondary dark:bg-gray-800 p-6 rounded-lg text-left mb-6">
-                <h3 className="font-bold text-textDark dark:text-gray-200">Why enable notifications?</h3>
-                <p className="text-sm text-textLight dark:text-gray-400 mt-1">We'll send you a daily reminder to help you build a consistent learning habit. You can manage this in your browser settings anytime.</p>
+          <div>
+            <h1 className="text-4xl font-extrabold text-[#0052CC] mb-3">One Last Step</h1>
+            <p className="text-slate-500 dark:text-gray-400 text-lg mb-8">Enable notifications to get your daily learning reminders.</p>
+            <div className="bg-slate-50 dark:bg-gray-800 p-8 rounded-2xl text-left mb-10 border border-slate-100 dark:border-gray-700">
+                <h3 className="font-bold text-xl text-slate-800 dark:text-gray-200 mb-3">Why enable notifications?</h3>
+                <p className="text-slate-500 dark:text-gray-400 leading-relaxed">We'll send you a daily reminder to help you build a consistent learning habit. You can manage this in your browser settings anytime.</p>
             </div>
              <button
-              onClick={handleRequestPermission}
-              className="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={handleFinish}
+              className="w-full bg-primary text-white font-bold py-5 px-4 rounded-xl text-lg hover:bg-blue-700 transition-all shadow-lg mb-6"
             >
               Allow Notifications & Start Learning
             </button>
             <button
               onClick={handleFinish}
-              className="mt-4 w-full text-sm text-textLight dark:text-gray-400 hover:text-textDark dark:hover:text-gray-200"
+              className="text-slate-400 font-bold hover:text-slate-600 transition-colors"
             >
               Maybe Later
             </button>

@@ -19,8 +19,8 @@
               sans: ['Inter', 'sans-serif'],
             },
             colors: {
-              primary: '#4F46E5',
-              secondary: '#F3F4F6',
+              primary: '#0052CC',
+              secondary: '#F4F5F7',
               accent: '#F43F5E',
             }
           },
@@ -28,15 +28,28 @@
       }
     </script>
     <style>
-      body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
-      .dark body { background-color: #111827; }
+      body { 
+        font-family: 'Inter', sans-serif; 
+        background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%);
+        min-height: 100vh;
+      }
+      .dark body { 
+        background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
+      }
       
-      /* Simple slide up animation for content */
       @keyframes slideUp {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .animate-in { animation: slideUp 0.4s ease-out forwards; }
+      .animate-in { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      
+      .word-card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .word-card-hover:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      }
     </style>
   <script type="importmap">
 {

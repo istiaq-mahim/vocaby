@@ -5,6 +5,7 @@ import VocabularyList from './components/VocabularyList';
 import BottomNav from './components/BottomNav';
 import SettingsPanel from './components/SettingsPanel';
 import AccountView from './components/AccountView';
+import Onboarding from './components/Onboarding';
 import { View } from './types';
 import type { Word, Settings, LearnedWord } from './types';
 import Review from './components/Review';
@@ -12,15 +13,9 @@ import ManualAdd from './components/ManualAdd';
 import { VOCABULARY_KEY, SETTINGS_KEY } from './constants';
 
 const App: React.FC = () => {
-  const [settings, setSettings] = useState<Settings>(() => {
+  const [settings, setSettings] = useState<Settings | null>(() => {
     const saved = localStorage.getItem(SETTINGS_KEY);
-    return saved ? JSON.parse(saved) : {
-      wordCount: 5,
-      notificationHour: 8,
-      notificationMinute: 0,
-      darkMode: false,
-      readingMode: false
-    };
+    return saved ? JSON.parse(saved) : null;
   });
   
   const [vocabulary, setVocabulary] = useState<LearnedWord[]>(() => {
@@ -32,9 +27,11 @@ const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    if (settings.darkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
+    if (settings) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      if (settings.darkMode) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    }
   }, [settings]);
 
   useEffect(() => {
@@ -67,24 +64,37 @@ const App: React.FC = () => {
       return vocabulary.filter(word => (word.nextReview || '9999-12-31') <= today).length;
   }, [vocabulary]);
 
+  const handleOnboardingComplete = (onboardingSettings: any) => {
+    setSettings({
+      ...onboardingSettings,
+      darkMode: false,
+      readingMode: false
+    });
+  };
+
+  if (!settings) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Simple Header */}
-      <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-30">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg"></div>
-          <h1 className="text-xl font-extrabold tracking-tight text-primary">VOCABY</h1>
-        </div>
-        <button 
-          onClick={() => setActiveView(View.ACCOUNT)}
-          className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm font-bold"
-        >
-          👤
-        </button>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      {/* Header hidden on daily view to match image design */}
+      {activeView !== View.DAILY && (
+        <header className="px-6 py-4 flex justify-between items-center sticky top-0 z-30">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-extrabold tracking-tight text-primary">VOCABY</h1>
+          </div>
+          <button 
+            onClick={() => setActiveView(View.ACCOUNT)}
+            className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-sm font-bold shadow-sm"
+          >
+            👤
+          </button>
+        </header>
+      )}
 
       {/* Main Content */}
-      <main className="flex-grow p-4 max-w-2xl mx-auto w-full pb-24">
+      <main className={`flex-grow p-4 max-w-2xl mx-auto w-full pb-28 ${activeView === View.DAILY ? 'pt-10' : ''}`}>
         <div className="animate-in">
           {activeView === View.DAILY && (
             <DailyWords 
@@ -129,7 +139,7 @@ const App: React.FC = () => {
       {isSettingsOpen && (
         <SettingsPanel 
           settings={settings} 
-          updateSettings={(s) => setSettings(prev => ({ ...prev, ...s }))} 
+          updateSettings={(s) => setSettings(prev => prev ? ({ ...prev, ...s }) : null)} 
           onClose={() => setIsSettingsOpen(false)} 
         />
       )}
