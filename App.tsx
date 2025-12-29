@@ -12,7 +12,7 @@ import Review from './components/Review';
 import ManualAdd from './components/ManualAdd';
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<{ user: { name: string; email: string; image?: string } } | null>(null);
+  const [session, setSession] = useState<{ user: { name: string; email: string; isGuest?: boolean } } | null>(null);
   const [settings, setSettings] = useState<Settings>({
     wordCount: 5,
     notificationHour: 8,
@@ -26,9 +26,18 @@ const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Check auth and sync data
   useEffect(() => {
     const checkAuth = async () => {
         try {
+            // Check for guest session first
+            const savedGuest = localStorage.getItem('vocaby_guest_session');
+            if (savedGuest) {
+              setSession(JSON.parse(savedGuest));
+              setIsReady(true);
+              return;
+            }
+
             const res = await fetch('/api/words'); 
             if (res.ok) {
                 const data = await res.json();
@@ -56,6 +65,22 @@ const App: React.FC = () => {
     if (settings.darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
   }, [settings.darkMode]);
+
+  const handleGuestLogin = () => {
+    const guestUser = { user: { name: "Guest Student", email: "guest@vocaby.local", isGuest: true } };
+    setSession(guestUser);
+    localStorage.setItem('vocaby_guest_session', JSON.stringify(guestUser));
+    setActiveView(View.DAILY);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('vocaby_guest_session');
+    setSession(null);
+    setActiveView(View.LANDING);
+    if (!session?.user.isGuest) {
+      window.location.href = '/api/auth/signout';
+    }
+  };
 
   const addWordsToVocabulary = useCallback((newWords: Word[]) => {
     setVocabulary(prev => {
@@ -89,7 +114,7 @@ const App: React.FC = () => {
   }
 
   if (activeView === View.LANDING || !session) {
-    return <LandingPage onLogin={() => window.location.href = '/api/auth/signin'} />;
+    return <LandingPage onLogin={() => window.location.href = '/api/auth/signin'} onGuestLogin={handleGuestLogin} />;
   }
 
   return (
@@ -162,16 +187,15 @@ const App: React.FC = () => {
             {activeView === View.REVIEW && <Review vocabulary={vocabulary} updateWordSrs={() => {}} />}
             {activeView === View.MANUAL_ADD && <ManualAdd addWordsToVocabulary={addWordsToVocabulary} />}
             {activeView === View.VOCABULARY && <VocabularyList vocabulary={vocabulary} learningLog={{}} />}
-            {activeView === View.ACCOUNT && <AccountView session={session} vocabulary={vocabulary} />}
+            {activeView === View.ACCOUNT && <AccountView session={session} vocabulary={vocabulary} onSignOut={handleSignOut} onOpenSettings={() => setIsSettingsOpen(true)} />}
           </div>
         </main>
       </div>
 
-      {/* Mobile Nav */}
+      {/* Mobile Nav - REMOVED SETTINGS OPTION (3 items only) */}
       <BottomNav 
           activeView={activeView} 
           setActiveView={setActiveView} 
-          onSettingsClick={() => setIsSettingsOpen(true)}
           reviewCount={reviewCount}
       />
 

@@ -3,9 +3,10 @@ import React from 'react';
 
 interface LandingPageProps {
   onLogin: () => void;
+  onGuestLogin: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGuestLogin }) => {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
       
@@ -37,31 +38,35 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             </h2>
             
             <p className="text-lg md:text-xl text-slate-400 max-w-xl mx-auto font-medium">
-                AI-curated learning designed specifically for Bangladeshi high-achievers. Learn faster, remember longer.
+                AI-curated learning designed specifically for Bangladeshi high-achievers. 
+                Learn 5-10 high-impact words daily with intelligent recall.
             </p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6">
+        <div className="flex flex-col items-center justify-center gap-4 pt-6">
             <button 
                 onClick={onLogin}
-                className="group relative w-full md:w-auto px-12 py-6 card-gradient text-white font-black text-xl rounded-3xl shadow-2xl shadow-primary/40 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-4 overflow-hidden"
+                className="group relative w-full md:w-auto px-12 py-5 card-gradient text-white font-black text-xl rounded-3xl shadow-2xl shadow-primary/40 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-4 overflow-hidden"
             >
-                <span className="relative z-10">Get Started Free</span>
+                <span className="relative z-10">Sign in with Google</span>
                 <span className="text-2xl group-hover:translate-x-1 transition-transform relative z-10">→</span>
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
             </button>
-            <div className="text-left hidden md:block border-l border-white/10 pl-6">
-                <p className="text-white text-sm font-bold">12,000+ Students</p>
-                <p className="text-slate-500 text-xs font-medium">Preparing for IELTS Band 7+</p>
+            
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="h-px bg-white/10 flex-grow hidden md:block"></div>
+              <span className="text-white/30 text-xs font-bold uppercase tracking-widest">or</span>
+              <div className="h-px bg-white/10 flex-grow hidden md:block"></div>
             </div>
+
+            <button 
+                onClick={onGuestLogin}
+                className="w-full md:w-auto px-12 py-4 glass text-white/80 hover:text-white font-bold text-sm rounded-2xl transition-all border border-white/10 hover:border-white/20"
+            >
+                Continue as Guest
+            </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-10">
-            <Feature icon="🧠" text="SRS Algorithm" />
-            <Feature icon="🤖" text="Gemini-3 AI" />
-            <Feature icon="🇧🇩" text="Bangla Context" />
-            <Feature icon="📊" text="Live Progress" />
-        </div>
+        {/* Removed 4 feature option cards from the bottom as requested */}
       </div>
 
       <footer className="absolute bottom-8 text-slate-500 text-xs font-bold uppercase tracking-[0.3em] opacity-40">
@@ -70,12 +75,5 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     </div>
   );
 };
-
-const Feature: React.FC<{icon: string, text: string}> = ({icon, text}) => (
-    <div className="p-4 glass rounded-2xl border-white/5 flex flex-col items-center gap-2 group hover:bg-white/5 transition-colors">
-        <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
-        <span className="text-[10px] text-white/40 font-black uppercase tracking-widest">{text}</span>
-    </div>
-);
 
 export default LandingPage;

@@ -3,11 +3,13 @@ import React from 'react';
 import type { LearnedWord } from '../types';
 
 interface AccountViewProps {
-  session: { user: { name: string; email: string; image?: string } };
+  session: { user: { name: string; email: string; image?: string; isGuest?: boolean } };
   vocabulary: LearnedWord[];
+  onSignOut: () => void;
+  onOpenSettings: () => void;
 }
 
-const AccountView: React.FC<AccountViewProps> = ({ session, vocabulary }) => {
+const AccountView: React.FC<AccountViewProps> = ({ session, vocabulary, onSignOut, onOpenSettings }) => {
   const stats = {
     total: vocabulary.length,
     mastered: vocabulary.filter(w => (w.srsLevel || 0) >= 5).length,
@@ -22,7 +24,14 @@ const AccountView: React.FC<AccountViewProps> = ({ session, vocabulary }) => {
     <div className="space-y-10 animate-slide-up pb-10">
       
       {/* Profile Header */}
-      <div className="p-1 glass rounded-4xl shadow-xl border border-slate-200 dark:border-slate-800">
+      <div className="p-1 glass rounded-4xl shadow-xl border border-slate-200 dark:border-slate-800 relative">
+        <button 
+          onClick={onOpenSettings}
+          className="absolute top-6 right-6 p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-primary hover:text-white transition-all shadow-sm"
+        >
+          ⚙️
+        </button>
+        
         <div className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
             <div className="relative group">
                 <div className="absolute inset-0 bg-primary/20 blur-2xl group-hover:bg-primary/40 transition-colors"></div>
@@ -33,7 +42,12 @@ const AccountView: React.FC<AccountViewProps> = ({ session, vocabulary }) => {
             </div>
             
             <div className="text-center md:text-left flex-grow space-y-2">
-                <h2 className="text-4xl font-display font-black tracking-tight">{session.user.name}</h2>
+                <div className="flex flex-col md:flex-row md:items-center gap-2 justify-center md:justify-start">
+                  <h2 className="text-4xl font-display font-black tracking-tight">{session.user.name}</h2>
+                  {session.user.isGuest && (
+                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-black uppercase rounded-lg w-fit mx-auto md:mx-0">Guest Mode</span>
+                  )}
+                </div>
                 <p className="text-slate-400 font-medium">{session.user.email}</p>
                 
                 <div className="pt-4 w-full max-w-sm space-y-2">
@@ -55,17 +69,40 @@ const AccountView: React.FC<AccountViewProps> = ({ session, vocabulary }) => {
         <StatCard label="Mastered" value={stats.mastered} color="green" icon="🎓" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <AchievementCard title="Early Bird" desc="Studied before 8 AM for 3 days" icon="🌅" achieved={true} />
-        <AchievementCard title="Century Club" desc="Learn 100 unique words" icon="💯" achieved={stats.total >= 100} />
+      <div className="p-8 glass rounded-4xl border border-primary/10">
+        <h3 className="text-xl font-display font-black mb-4">Account Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button 
+              onClick={onOpenSettings}
+              className="flex items-center gap-4 p-5 rounded-3xl bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white transition-all group border dark:border-slate-700"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">⚙️</span>
+              <div className="text-left">
+                <p className="font-bold">Preferences</p>
+                <p className="text-[10px] opacity-60 font-medium">Notifications, Dark Mode</p>
+              </div>
+            </button>
+            <button 
+              onClick={onSignOut}
+              className="flex items-center gap-4 p-5 rounded-3xl bg-red-50 dark:bg-red-900/10 hover:bg-red-500 hover:text-white transition-all group border border-red-100 dark:border-red-900/20"
+            >
+              <span className="text-2xl group-hover:rotate-12 transition-transform">🚪</span>
+              <div className="text-left">
+                <p className="font-bold">Logout</p>
+                <p className="text-[10px] opacity-60 font-medium">Sign out from this device</p>
+              </div>
+            </button>
+        </div>
       </div>
-
-      <button 
-        onClick={() => window.location.href = '/api/auth/signout'}
-        className="w-full p-6 glass hover:bg-red-50 dark:hover:bg-red-900/10 text-red-500 font-bold rounded-3xl transition-all border border-red-100 dark:border-red-900/20"
-      >
-        Sign Out & Secure Account
-      </button>
+      
+      {session.user.isGuest && (
+        <div className="p-6 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-3xl text-amber-800 dark:text-amber-400">
+          <p className="text-sm font-bold flex gap-2">
+            <span>⚠️</span> 
+            You are using Guest Mode. Sign in with Google to sync your progress across devices and save your learned words to the cloud.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -78,19 +115,6 @@ const StatCard: React.FC<{label: string, value: number, color: string, icon: str
         </div>
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
         <p className="text-4xl font-display font-black text-slate-900 dark:text-white mt-1 group-hover:scale-110 transition-transform origin-left">{value}</p>
-    </div>
-);
-
-const AchievementCard: React.FC<{title: string, desc: string, icon: string, achieved: boolean}> = ({title, desc, icon, achieved}) => (
-    <div className={`p-6 rounded-4xl border transition-all flex items-center gap-5 ${achieved ? 'glass border-primary/20' : 'opacity-40 grayscale border-slate-200 dark:border-slate-800'}`}>
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${achieved ? 'card-gradient text-white' : 'bg-slate-200 dark:bg-slate-800'}`}>
-            {icon}
-        </div>
-        <div>
-            <h4 className="font-bold text-lg">{title}</h4>
-            <p className="text-xs text-slate-400 font-medium">{desc}</p>
-        </div>
-        {achieved && <span className="ml-auto text-primary">✔</span>}
     </div>
 );
 
