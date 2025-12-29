@@ -1,74 +1,90 @@
 
 import React from 'react';
 import type { Word, SynonymAntonym } from '../types';
-import { SpeakerIcon } from './icons/SpeakerIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
 
 interface WordCardProps {
   wordData: Word;
 }
 
 const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
-  
   const handlePronounce = () => {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(wordData.word);
       utterance.lang = 'en-US';
+      utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-    } else {
-      alert("Your browser does not support text-to-speech.");
     }
   };
 
-  const renderList = (title: string, items: SynonymAntonym[] | undefined) => {
-    if (!items || items.length === 0) return null;
-    return (
-      <div className="mt-3">
-        <h4 className="font-semibold text-textDark dark:text-gray-200 mb-2">{title}</h4>
-        <div className="flex flex-wrap gap-2">
-          {items.map(item => (
-            <div key={item.word} className="bg-secondary dark:bg-gray-700 px-3 py-1 rounded-full text-sm">
-              <span className="text-textDark dark:text-gray-200 font-medium">{item.word}</span>
-              <span className="text-textLight dark:text-gray-400 ml-1.5">({item.meaning})</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-none dark:border dark:border-gray-700 p-5 transition-all duration-300 ease-in-out hover:shadow-xl hover:transform hover:-translate-y-1 group">
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-primary capitalize">{wordData.word}</h2>
-            {wordData.isAiGenerated && (
-              <span className="text-amber-500 scale-75 opacity-50 group-hover:opacity-100 transition-opacity" title="AI Generated">
-                <SparklesIcon />
-              </span>
-            )}
-          </div>
-          <p className="text-lg text-accent">{wordData.meaning_bangla}</p>
-        </div>
-        <button onClick={handlePronounce} className="text-textLight dark:text-gray-400 hover:text-primary dark:hover:text-accent transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0" aria-label={`Pronounce ${wordData.word}`}>
-          <SpeakerIcon />
-        </button>
-      </div>
+    <div className="glass group relative p-6 md:p-8 rounded-4xl border border-slate-200 dark:border-slate-800 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10">
       
-      <div className="border-t dark:border-gray-700 pt-2">
-        {renderList('Synonyms', wordData.synonyms)}
-        {renderList('Antonyms', wordData.antonyms)}
+      {/* Background Accent */}
+      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+        <span className="text-6xl font-black font-display uppercase tracking-tighter text-primary">{wordData.word.charAt(0)}</span>
+      </div>
 
-        <div className="mt-4">
-            <h4 className="font-semibold text-textDark dark:text-gray-200 mb-2">Examples</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-textLight dark:text-gray-400">
-                {wordData.examples.map((ex, index) => <li key={index}>{ex}</li>)}
-            </ul>
+      <div className="flex justify-between items-start relative z-10">
+        <div className="space-y-1">
+            <div className="flex items-center gap-3">
+                <h2 className="text-3xl md:text-4xl font-display font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">
+                    {wordData.word}
+                </h2>
+                <button 
+                    onClick={handlePronounce}
+                    className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm"
+                >
+                    🔊
+                </button>
+            </div>
+            <div className="flex items-center gap-2">
+                <p className="text-xl font-bold text-primary dark:text-primary-light font-display">
+                    {wordData.meaning_bangla}
+                </p>
+                <div className="h-1 w-8 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+            </div>
+        </div>
+        {wordData.isAiGenerated && (
+            <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest shadow-sm">AI Curated</span>
+        )}
+      </div>
+
+      <div className="mt-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Section title="Synonyms" items={wordData.synonyms} type="synonym" />
+            <Section title="Antonyms" items={wordData.antonyms} type="antonym" />
+        </div>
+
+        <div className="pt-6 border-t border-slate-100 dark:border-slate-800/50">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Contextual Usage (IELTS Prep)</h4>
+            <div className="space-y-3">
+                {wordData.examples.slice(0, 3).map((ex, i) => (
+                    <div key={i} className="flex gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 text-sm leading-relaxed italic border border-transparent hover:border-primary/20 transition-all">
+                        <span className="text-primary font-bold">0{i+1}</span>
+                        <p className="text-slate-600 dark:text-slate-300">"{ex}"</p>
+                    </div>
+                ))}
+            </div>
         </div>
       </div>
     </div>
   );
+};
+
+const Section: React.FC<{title: string, items: SynonymAntonym[], type: 'synonym' | 'antonym'}> = ({title, items, type}) => {
+    if (!items || items.length === 0) return null;
+    return (
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 shadow-sm">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">{title}</h4>
+            <div className="flex flex-wrap gap-2">
+                {items.slice(0, 4).map((item, i) => (
+                    <div key={i} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${type === 'synonym' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
+                        {item.word} <span className="opacity-50 font-normal">({item.meaning})</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
 export default WordCard;

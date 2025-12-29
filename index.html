@@ -4,110 +4,102 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <title>Vocaby - English for Bangladesh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class', // Enable dark mode
+        darkMode: 'class',
         theme: {
           extend: {
-            colors: {
-              primary: '#0052CC',
-              secondary: '#F4F5F7',
-              accent: '#4C9AFF',
-              textDark: '#172B4D',
-              textLight: '#5E6C84',
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Outfit', 'sans-serif'],
             },
-            keyframes: {
-              'fade-in': {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
+            colors: {
+              primary: {
+                DEFAULT: '#4F46E5',
+                dark: '#4338CA',
+                light: '#818CF8',
               },
-              'fade-in-up': {
-                '0%': {
-                  opacity: '0',
-                  transform: 'translateY(1rem)'
-                },
-                '100%': {
-                  opacity: '1',
-                  transform: 'translateY(0)'
-                },
-              },
+              accent: '#F43F5E',
+              surface: '#FFFFFF',
+              background: '#F8FAFC',
+            },
+            borderRadius: {
+              '3xl': '1.5rem',
+              '4xl': '2rem',
             },
             animation: {
-              'fade-in': 'fade-in 0.5s ease-out forwards',
-              'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+              'subtle-float': 'float 6s ease-in-out infinite',
+              'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+              'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              slideUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              pulseSoft: {
+                '0%, 100%': { opacity: '1' },
+                '50%': { opacity: '0.8' },
+              }
             }
           },
         },
       }
     </script>
     <style>
-      .background-animation {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        z-index: -1;
-        overflow: hidden;
-        background: #F4F5F7;
+      body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+      .font-display { font-family: 'Outfit', sans-serif; }
+      
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
       }
-      html.dark .background-animation {
-        background: #111827; /* dark gray */
-      }
-
-      .blob {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.6;
-      }
-      html.dark .blob {
-        opacity: 0.4;
+      
+      .dark .glass {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
 
-      .blob-1 {
-        width: 300px;
-        height: 300px;
-        background: rgba(0, 82, 204, 0.3); /* primary color */
-        top: -50px;
-        left: -100px;
-        animation: move 25s infinite alternate;
+      .card-gradient {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
       }
 
-      .blob-2 {
-        width: 350px;
-        height: 350px;
-        background: rgba(76, 154, 255, 0.3); /* accent color */
-        bottom: -80px;
-        right: -120px;
-        animation: move 30s infinite alternate-reverse;
-      }
-       .blob-3 {
-        width: 250px;
-        height: 250px;
-        background: rgba(0, 82, 204, 0.2);
-        bottom: 50px;
-        left: -150px;
-        animation: move 20s infinite alternate;
+      .text-glow {
+        text-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
       }
 
-      @keyframes move {
-        from {
-          transform: translate(0, 0) rotate(0deg);
-        }
-        to {
-          transform: translate(100px, 50px) rotate(180deg);
-        }
-      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 5px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+      html.dark ::-webkit-scrollbar-thumb { background: #334155; }
 
-      /* Reading Mode Style */
-      html.reading-mode #root {
-        transition: filter 0.3s ease-in-out;
-        filter: sepia(0.35) brightness(0.95);
+      /* Flashcard Flip CSS */
+      .flip-card { perspective: 1000px; background-color: transparent; }
+      .flip-card-inner {
+        position: relative; width: 100%; height: 100%;
+        text-align: center; transition: transform 0.6s;
+        transform-style: preserve-3d;
       }
+      .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
+      .flip-card-front, .flip-card-back {
+        position: absolute; width: 100%; height: 100%;
+        -webkit-backface-visibility: hidden; backface-visibility: hidden;
+        border-radius: 1.5rem;
+      }
+      .flip-card-back { transform: rotateY(180deg); }
     </style>
   <script type="importmap">
 {
@@ -126,12 +118,7 @@
 }
 </script>
 </head>
-  <body>
-    <div class="background-animation">
-      <div class="blob blob-1"></div>
-      <div class="blob blob-2"></div>
-      <div class="blob blob-3"></div>
-    </div>
+  <body class="bg-background dark:bg-slate-950">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

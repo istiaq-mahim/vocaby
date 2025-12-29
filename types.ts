@@ -19,6 +19,15 @@ export interface LearnedWord extends Word {
   nextReview: string;
 }
 
+// FIX: Added missing LearningLog and LearningLogEntry interfaces to resolve import errors.
+export interface LearningLogEntry {
+  status: 'learned' | 'declined';
+}
+
+export interface LearningLog {
+  [date: string]: LearningLogEntry;
+}
+
 export interface Settings {
   wordCount: number;
   notificationHour: number;
@@ -28,20 +37,19 @@ export interface Settings {
 }
 
 export enum View {
+  LANDING = 'LANDING',
   DAILY = 'DAILY',
   REVIEW = 'REVIEW',
   MANUAL_ADD = 'MANUAL_ADD',
   VOCABULARY = 'VOCABULARY',
-}
-
-export interface LearningLog {
-  [date: string]: {
-    status: 'learned' | 'declined';
-  };
+  ACCOUNT = 'ACCOUNT',
 }
 
 export interface UserProgress {
   userId: string;
+  email: string;
+  name: string;
+  image?: string;
   lastFetchDate: string;
   wordsGeneratedToday: number;
   dailyLimit: number;

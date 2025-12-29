@@ -14,7 +14,7 @@ interface DailyWordsProps {
 const DailyWords: React.FC<DailyWordsProps> = ({ settings, addWordsToVocabulary }) => {
   const [dailyWords, setDailyWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isNewGeneration, setIsNewGeneration] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
 
   const fetchWords = useCallback(async () => {
     setLoading(true);
@@ -22,6 +22,7 @@ const DailyWords: React.FC<DailyWordsProps> = ({ settings, addWordsToVocabulary 
       const words = await getDailyWords(settings.wordCount);
       setDailyWords(words);
       addWordsToVocabulary(words);
+      if (words.length >= 10) setLimitReached(true);
     } catch (e) {
       console.error(e);
     } finally {
@@ -33,33 +34,81 @@ const DailyWords: React.FC<DailyWordsProps> = ({ settings, addWordsToVocabulary 
     fetchWords();
   }, [fetchWords]);
 
+  const progress = Math.min((dailyWords.length / settings.wordCount) * 100, 100);
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Daily Focus</h1>
-        <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-green-500"></span>
-            <p className="text-sm text-textLight dark:text-gray-400">
-                You've received your {dailyWords.length} words for today. Focused learning helps retention!
-            </p>
+    <div className="space-y-10">
+      
+      {/* Motivational Header */}
+      <div className="p-8 md:p-10 card-gradient rounded-4xl text-white shadow-2xl shadow-primary/30 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 animate-slide-up">
+        {/* Abstract Background Shapes */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+        
+        <div className="flex-grow space-y-3 text-center md:text-left relative z-10">
+            <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter">Your Daily Goal</h1>
+            <p className="text-lg text-white/80 font-medium">আজকের {settings.wordCount}টি শব্দ শেখার মাধ্যমে আপনি আপনার স্বপ্নের এক ধাপ কাছে পৌঁছে যাচ্ছেন।</p>
+        </div>
+
+        <div className="relative flex-shrink-0 z-10">
+            <svg className="w-32 h-32 transform -rotate-90">
+                <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-white/20" />
+                <circle 
+                    cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="10" fill="transparent" 
+                    strokeDasharray={364.4}
+                    strokeDashoffset={364.4 - (364.4 * progress) / 100}
+                    className="text-white transition-all duration-1000 ease-out"
+                    strokeLinecap="round"
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-black">{Math.round(progress)}%</span>
+                <span className="text-[10px] font-bold uppercase opacity-70">Goal</span>
+            </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="space-y-4">
+        <div className="grid gap-6">
             <WordCardSkeleton />
             <WordCardSkeleton />
         </div>
       ) : (
-        <div className="grid gap-4">
-          {dailyWords.map((word, i) => (
-            <div key={i} className="animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
-                <WordCard wordData={word} />
+        <div className="grid gap-8">
+          {dailyWords.length > 0 ? (
+            <>
+              {dailyWords.map((word, i) => (
+                <div key={i} className="animate-slide-up" style={{ animationDelay: `${i * 150}ms` }}>
+                  <WordCard wordData={word} />
+                </div>
+              ))}
+              
+              <div className="pt-4">
+                <StoryCard 
+                    story="Consistent preparation is key. Mastering these words today sets a strong foundation for your writing and speaking tests." 
+                    words={dailyWords.map(w => w.word)} 
+                />
+              </div>
+
+              {limitReached && (
+                <div className="p-10 glass rounded-4xl text-center border-2 border-primary/20 bg-primary/5">
+                    <span className="text-5xl mb-4 block">🎯</span>
+                    <h3 className="text-2xl font-display font-black text-primary">Daily Focus Achieved!</h3>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto">You've hit today's high-retention limit. Use these words in your practice tests for maximum impact.</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="p-20 text-center glass rounded-4xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🗓️</div>
+                <h3 className="text-2xl font-display font-bold">Ready to start?</h3>
+                <p className="text-slate-400 mt-2 mb-8">Click below to generate today's curated vocabulary list.</p>
+                <button 
+                    onClick={fetchWords}
+                    className="px-10 py-5 card-gradient text-white font-black text-lg rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform"
+                >
+                    Generate Words
+                </button>
             </div>
-          ))}
-          
-          {dailyWords.length > 0 && (
-             <StoryCard story="Learning consistent amounts daily is scientifically proven to build a better vocabulary for IELTS." words={[]} />
           )}
         </div>
       )}

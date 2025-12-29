@@ -3,7 +3,6 @@ import React, { useState, useMemo, useCallback } from 'react';
 import type { LearnedWord } from '../types';
 import WordCard from './WordCard';
 import { calculateNextReview, PerformanceRating } from '../services/srsService';
-import { CheckCircleIcon } from './icons/CheckCircleIcon';
 
 interface ReviewProps {
   vocabulary: LearnedWord[];
@@ -15,7 +14,6 @@ const Review: React.FC<ReviewProps> = ({ vocabulary, updateWordSrs }) => {
 
   const wordsToReview = useMemo(() => {
     const today = getToday();
-    // Filter for words due for review and shuffle them
     return vocabulary
       .filter(word => (word.nextReview || '9999-12-31') <= today)
       .sort(() => Math.random() - 0.5);
@@ -28,81 +26,85 @@ const Review: React.FC<ReviewProps> = ({ vocabulary, updateWordSrs }) => {
   
   const handleNextWord = useCallback((rating: PerformanceRating) => {
     if (!currentWord) return;
-
     const newSrsData = calculateNextReview(currentWord, rating);
     updateWordSrs(currentWord, newSrsData);
-    
     setIsRevealed(false);
-    setCurrentIndex(prev => prev + 1);
+    setTimeout(() => {
+        setCurrentIndex(prev => prev + 1);
+    }, 300);
   }, [currentWord, updateWordSrs]);
   
   if (wordsToReview.length === 0) {
     return (
-      <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:border dark:border-gray-700 animate-fade-in">
-        <h1 className="text-3xl font-bold text-textDark dark:text-gray-100 mb-2">All Caught Up!</h1>
-        <p className="text-textLight dark:text-gray-400">You have no words to review today. Come back tomorrow or learn some new words!</p>
+      <div className="text-center p-16 glass rounded-4xl border-2 border-slate-100 dark:border-slate-800 animate-slide-up">
+        <span className="text-7xl block mb-6 animate-subtle-float">🎉</span>
+        <h1 className="text-4xl font-display font-black tracking-tight mb-2">You're All Caught Up!</h1>
+        <p className="text-slate-400 font-medium max-w-sm mx-auto">সবগুলো শব্দ রিভিশন করা শেষ! নতুন শব্দ শিখতে হোম পেজে ফিরে যান।</p>
       </div>
     );
   }
 
   if (currentIndex >= wordsToReview.length) {
     return (
-      <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:border dark:border-gray-700 animate-fade-in flex flex-col items-center">
-        <CheckCircleIcon />
-        <h1 className="text-3xl font-bold text-textDark dark:text-gray-100 mt-4 mb-2">Review Complete!</h1>
-        <p className="text-textLight dark:text-gray-400">Great job! You've reviewed all your words for today.</p>
+      <div className="text-center p-16 glass rounded-4xl border-2 border-primary/20 animate-slide-up">
+        <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl shadow-green-500/20">✔</div>
+        <h1 className="text-4xl font-display font-black tracking-tight mb-2">Session Complete!</h1>
+        <p className="text-slate-400 font-medium">আপনার দীর্ঘমেয়াদী স্মৃতি শক্তি বৃদ্ধি পাচ্ছে। এভাবেই চালিয়ে যান!</p>
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold text-textDark dark:text-gray-100 mb-1">Review Session</h1>
-      <p className="text-textLight dark:text-gray-400 mb-6">
-        {wordsToReview.length - currentIndex} word{wordsToReview.length - currentIndex !== 1 ? 's' : ''} left to review.
-      </p>
+    <div className="space-y-8 pb-10">
+      <div className="flex justify-between items-end">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-display font-black tracking-tight">SRS Review</h1>
+            <p className="text-slate-400 font-medium font-display uppercase tracking-widest text-[10px]">Active Recall Session</p>
+          </div>
+          <div className="text-right">
+              <span className="text-2xl font-black text-primary">{wordsToReview.length - currentIndex}</span>
+              <span className="text-xs text-slate-400 block font-bold">REMAINING</span>
+          </div>
+      </div>
 
-      <div className="space-y-4">
-        {/* Flashcard */}
-        {!isRevealed ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-none dark:border dark:border-gray-700 p-5 min-h-[200px] flex flex-col justify-center items-center">
-                <h2 className="text-4xl font-bold text-primary capitalize">{currentWord.word}</h2>
-                <button
-                    onClick={() => setIsRevealed(true)}
-                    className="mt-8 bg-primary text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    Show Meaning
-                </button>
-            </div>
-        ) : (
-            <div>
-                <WordCard wordData={currentWord} />
-                <div className="mt-4 grid grid-cols-3 gap-3">
-                    <button
-                        onClick={() => handleNextWord('hard')}
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-                    >
-                        Hard
-                    </button>
-                    <button
-                        onClick={() => handleNextWord('good')}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-                    >
-                        Good
-                    </button>
-                    <button
-                        onClick={() => handleNextWord('easy')}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-                    >
-                        Easy
-                    </button>
+      <div className="relative">
+        <div className={`flip-card w-full min-h-[400px] cursor-pointer ${isRevealed ? 'is-flipped' : ''}`} onClick={() => !isRevealed && setIsRevealed(true)}>
+            <div className="flip-card-inner">
+                {/* Front Side */}
+                <div className="flip-card-front glass flex flex-col items-center justify-center p-10 border-2 border-primary/10 shadow-2xl">
+                    <span className="text-sm font-black text-primary uppercase tracking-[0.3em] mb-4 opacity-50">What does this mean?</span>
+                    <h2 className="text-5xl md:text-6xl font-display font-black tracking-tighter text-slate-900 dark:text-white capitalize">{currentWord.word}</h2>
+                    <div className="mt-10 px-6 py-2 rounded-full bg-primary/5 text-primary text-xs font-bold animate-pulse-soft">Tap to Reveal Meaning</div>
                 </div>
-                 <p className="text-xs text-center text-textLight dark:text-gray-500 mt-2">How well did you remember this word?</p>
+                {/* Back Side */}
+                <div className="flip-card-back w-full h-full overflow-y-auto">
+                    <WordCard wordData={currentWord} />
+                </div>
+            </div>
+        </div>
+
+        {isRevealed && (
+            <div className="mt-8 animate-slide-up">
+                <div className="grid grid-cols-3 gap-4">
+                    <RatingBtn onClick={() => handleNextWord('hard')} label="Hard" color="red" sub="Try again soon" />
+                    <RatingBtn onClick={() => handleNextWord('good')} label="Good" color="blue" sub="Standard review" />
+                    <RatingBtn onClick={() => handleNextWord('easy')} label="Easy" color="green" sub="Show much later" />
+                </div>
             </div>
         )}
       </div>
     </div>
   );
 };
+
+const RatingBtn: React.FC<{label: string, color: string, sub: string, onClick: () => void}> = ({label, color, sub, onClick}) => (
+    <button
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        className={`flex flex-col items-center p-4 rounded-3xl transition-all border group hover:scale-105 ${color === 'red' ? 'bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 text-red-600' : color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30 text-blue-600' : 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30 text-green-600'}`}
+    >
+        <span className="font-black text-lg">{label}</span>
+        <span className="text-[8px] font-bold uppercase tracking-widest opacity-60 mt-1">{sub}</span>
+    </button>
+);
 
 export default Review;
