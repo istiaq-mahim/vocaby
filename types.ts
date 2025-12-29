@@ -10,13 +10,13 @@ export interface Word {
   synonyms: SynonymAntonym[];
   antonyms: SynonymAntonym[];
   examples: string[];
-  isAiGenerated?: boolean; // New field to track source
+  isAiGenerated?: boolean;
 }
 
 export interface LearnedWord extends Word {
-  learnedOn: string; // YYYY-MM-DD format
-  srsLevel: number; // New SRS property
-  nextReview: string; // New SRS property, YYYY-MM-DD format
+  learnedOn: string;
+  srsLevel: number;
+  nextReview: string;
 }
 
 export interface Settings {
@@ -29,8 +29,8 @@ export interface Settings {
 
 export enum View {
   DAILY = 'DAILY',
-  REVIEW = 'REVIEW', // Added for spaced repetition
-  MANUAL_ADD = 'MANUAL_ADD', // Added for manual word entry
+  REVIEW = 'REVIEW',
+  MANUAL_ADD = 'MANUAL_ADD',
   VOCABULARY = 'VOCABULARY',
 }
 
@@ -38,4 +38,11 @@ export interface LearningLog {
   [date: string]: {
     status: 'learned' | 'declined';
   };
+}
+
+export interface UserProgress {
+  userId: string;
+  lastFetchDate: string;
+  wordsGeneratedToday: number;
+  dailyLimit: number;
 }

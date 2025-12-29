@@ -1,0 +1,45 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0052CC;
+  --secondary: #F4F5F7;
+}
+
+.background-animation {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #F4F5F7;
+}
+
+.dark .background-animation {
+  background: #111827;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.6;
+}
+
+.blob-1 {
+  width: 300px;
+  height: 300px;
+  background: rgba(0, 82, 204, 0.3);
+  top: -50px;
+  left: -100px;
+  animation: move 25s infinite alternate;
+}
+
+@keyframes move {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(100px, 50px) rotate(180deg); }
+}
