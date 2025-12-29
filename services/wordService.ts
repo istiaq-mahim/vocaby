@@ -24,12 +24,25 @@ const setUsedIndices = (indices: number[]): void => {
 };
 
 export const getDailyWords = async (count: number): Promise<Word[]> => {
+    // 1. Try to fetch from Gemini first to provide fresh AI content
+    try {
+        if (process.env.API_KEY) {
+            console.log("Attempting to fetch fresh words from Gemini...");
+            const geminiWords = await fetchWordsFromGemini(count);
+            return geminiWords;
+        }
+    } catch (error) {
+        console.warn("Gemini API call failed, falling back to starter words.", error);
+    }
+
+    // 2. Fallback to starter words if Gemini fails or API_KEY is missing
     const usedIndices = getUsedIndices();
     
-    // Find indices of available static words
+    // Find indices of available static words and randomize the selection so it doesn't feel "static"
     const availableStaticIndices = starterWords
         .map((_, index) => index)
-        .filter(index => !usedIndices.includes(index));
+        .filter(index => !usedIndices.includes(index))
+        .sort(() => Math.random() - 0.5);
 
     if (availableStaticIndices.length > 0) {
         const indicesToUse = availableStaticIndices.slice(0, count);
@@ -37,27 +50,9 @@ export const getDailyWords = async (count: number): Promise<Word[]> => {
         
         // Mark these indices as used
         setUsedIndices([...usedIndices, ...indicesToUse]);
-        
-        // If we don't have enough static words for a full daily set, fetch the rest from Gemini
-        if (wordsToReturn.length < count) {
-            const remainingCount = count - wordsToReturn.length;
-            try {
-                const geminiWords = await fetchWordsFromGemini(remainingCount);
-                return [...wordsToReturn, ...geminiWords];
-            } catch (error) {
-                // If Gemini fails but we have some static words, it's better to return them than nothing.
-                if (wordsToReturn.length > 0) {
-                    console.warn("Gemini fetch failed, returning partial list from static words.");
-                    return wordsToReturn;
-                }
-                // Re-throw if we have nothing to show the user
-                throw error;
-            }
-        }
-        
         return wordsToReturn;
-    } else {
-        // No static words left, fetch everything from Gemini
-        return fetchWordsFromGemini(count);
     }
+
+    // 3. If even static words are exhausted and Gemini failed, we must throw
+    throw new Error("No words available. Please check your internet connection or API key.");
 };

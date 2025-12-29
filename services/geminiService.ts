@@ -25,11 +25,8 @@ const wordSchema = {
 
 // Helper to get a fresh AI instance with the current API_KEY
 const getAI = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("Gemini API key is not configured in environment variables.");
-  }
-  return new GoogleGenAI({ apiKey });
+  // FIX: Initialize GoogleGenAI strictly using process.env.API_KEY as per the guidelines.
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
 export const fetchDailyWords = async (count: number): Promise<Word[]> => {

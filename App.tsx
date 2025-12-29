@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Onboarding from './components/Onboarding';
 import DailyWords from './components/DailyWords';
@@ -147,6 +148,7 @@ const App: React.FC = () => {
         notificationTimeToday.setMinutes(settings.notificationMinute);
         
         if (now >= notificationTimeToday && notifState.count === 0) {
+            // FIX: Cast notification options to any to allow 'actions' property which is supported by Service Worker showNotification but missing in standard NotificationOptions type.
             showNotification("Are u free to learn?", {
                 body: "Time for your daily vocabulary!",
                 actions: [
@@ -155,7 +157,7 @@ const App: React.FC = () => {
                 ],
                 tag: 'daily-reminder',
                 renotify: true,
-            });
+            } as any);
             localStorage.setItem(stateKey, JSON.stringify({ count: 1 }));
         }
     };
