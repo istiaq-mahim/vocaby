@@ -1,6 +1,4 @@
 
-
-
 export interface SynonymAntonym {
   word: string;
   meaning: string;
@@ -12,6 +10,7 @@ export interface Word {
   synonyms: SynonymAntonym[];
   antonyms: SynonymAntonym[];
   examples: string[];
+  isAiGenerated?: boolean; // New field to track source
 }
 
 export interface LearnedWord extends Word {
@@ -32,7 +31,6 @@ export enum View {
   DAILY = 'DAILY',
   REVIEW = 'REVIEW', // Added for spaced repetition
   MANUAL_ADD = 'MANUAL_ADD', // Added for manual word entry
-  // FIX: Corrected typo in enum member name from 'VOCABULULARY' to 'VOCABULARY'.
   VOCABULARY = 'VOCABULARY',
 }
 

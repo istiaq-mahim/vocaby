@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Word, SynonymAntonym } from '../types';
 import { SpeakerIcon } from './icons/SpeakerIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
 
 interface WordCardProps {
   wordData: Word;
@@ -37,10 +38,17 @@ const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-none dark:border dark:border-gray-700 p-5 transition-all duration-300 ease-in-out hover:shadow-xl hover:transform hover:-translate-y-1">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-none dark:border dark:border-gray-700 p-5 transition-all duration-300 ease-in-out hover:shadow-xl hover:transform hover:-translate-y-1 group">
       <div className="flex justify-between items-start mb-3">
         <div>
-          <h2 className="text-2xl font-bold text-primary capitalize">{wordData.word}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-primary capitalize">{wordData.word}</h2>
+            {wordData.isAiGenerated && (
+              <span className="text-amber-500 scale-75 opacity-50 group-hover:opacity-100 transition-opacity" title="AI Generated">
+                <SparklesIcon />
+              </span>
+            )}
+          </div>
           <p className="text-lg text-accent">{wordData.meaning_bangla}</p>
         </div>
         <button onClick={handlePronounce} className="text-textLight dark:text-gray-400 hover:text-primary dark:hover:text-accent transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0" aria-label={`Pronounce ${wordData.word}`}>

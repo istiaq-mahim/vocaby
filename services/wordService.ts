@@ -2,6 +2,7 @@
 import { starterWords } from '../data/starterWords';
 import { fetchDailyWords as fetchWordsFromGemini } from './geminiService';
 import type { Word } from '../types';
+import { DAILY_WORDS_KEY, LAST_FETCH_DATE_KEY } from '../constants';
 
 const USED_STATIC_WORDS_INDICES_KEY = 'vocaby_used_static_indices';
 
@@ -23,22 +24,34 @@ const setUsedIndices = (indices: number[]): void => {
     }
 };
 
+/**
+ * Clears the daily cache to force a re-fetch from the API.
+ */
+export const clearDailyCache = () => {
+    localStorage.removeItem(DAILY_WORDS_KEY);
+    localStorage.removeItem(LAST_FETCH_DATE_KEY);
+};
+
 export const getDailyWords = async (count: number): Promise<Word[]> => {
+    const apiKey = process.env.API_KEY || (import.meta as any).env?.VITE_API_KEY;
+
     // 1. Try to fetch from Gemini first to provide fresh AI content
     try {
-        if (process.env.API_KEY) {
-            console.log("Attempting to fetch fresh words from Gemini...");
+        if (apiKey && apiKey !== "undefined" && apiKey.length > 5) {
+            console.log("Gemini API Key detected. Fetching words...");
             const geminiWords = await fetchWordsFromGemini(count);
-            return geminiWords;
+            return geminiWords.map(w => ({ ...w, isAiGenerated: true }));
+        } else {
+            console.warn("API_KEY is missing or invalid. Falling back to starter words.");
         }
     } catch (error) {
-        console.warn("Gemini API call failed, falling back to starter words.", error);
+        console.error("Gemini API call failed:", error);
+        // We still fall back, but we've logged the error for debugging.
     }
 
-    // 2. Fallback to starter words if Gemini fails or API_KEY is missing
+    // 2. Fallback to starter words
     const usedIndices = getUsedIndices();
     
-    // Find indices of available static words and randomize the selection so it doesn't feel "static"
     const availableStaticIndices = starterWords
         .map((_, index) => index)
         .filter(index => !usedIndices.includes(index))
@@ -46,13 +59,14 @@ export const getDailyWords = async (count: number): Promise<Word[]> => {
 
     if (availableStaticIndices.length > 0) {
         const indicesToUse = availableStaticIndices.slice(0, count);
-        const wordsToReturn = indicesToUse.map(index => starterWords[index]);
+        const wordsToReturn = indicesToUse.map(index => ({
+            ...starterWords[index],
+            isAiGenerated: false
+        }));
         
-        // Mark these indices as used
         setUsedIndices([...usedIndices, ...indicesToUse]);
         return wordsToReturn;
     }
 
-    // 3. If even static words are exhausted and Gemini failed, we must throw
     throw new Error("No words available. Please check your internet connection or API key.");
 };
