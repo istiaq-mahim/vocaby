@@ -6,7 +6,6 @@ import VocabularyList from './components/VocabularyList';
 import BottomNav from './components/BottomNav';
 import SettingsPanel from './components/SettingsPanel';
 import { useLocalStorage } from './hooks/useLocalStorage';
-// FIX: Separate the 'View' enum import from the type-only imports to resolve usage as a value.
 import { View } from './types';
 import type { Word, Settings, LearnedWord, LearningLog } from './types';
 import { SETTINGS_KEY, VOCABULARY_KEY, LEARNING_LOG_KEY, NOTIFICATION_STATE_KEY_PREFIX } from './constants';
@@ -24,14 +23,18 @@ const App: React.FC = () => {
   const getToday = () => new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    const storedSettings = localStorage.getItem(SETTINGS_KEY);
-    if (storedSettings) {
-      setSettings(JSON.parse(storedSettings));
+    try {
+      const storedSettings = localStorage.getItem(SETTINGS_KEY);
+      if (storedSettings) {
+        setSettings(JSON.parse(storedSettings));
+      }
+    } catch (err) {
+      console.warn("Failed to parse settings from localStorage:", err);
+    } finally {
+      setIsReady(true);
     }
-    setIsReady(true);
   }, [setSettings]);
   
-  // Effect to apply theme and mode classes to the document
   useEffect(() => {
     if (settings) {
       const root = document.documentElement;
@@ -39,7 +42,6 @@ const App: React.FC = () => {
       root.classList.toggle('reading-mode', settings.readingMode);
     }
   }, [settings]);
-
 
   const handleOnboardingComplete = (newSettings: Omit<Settings, 'darkMode' | 'readingMode'>) => {
     setSettings({
@@ -62,8 +64,8 @@ const App: React.FC = () => {
     const wordsToLearn: LearnedWord[] = newWords.map(word => ({
         ...word,
         learnedOn: today,
-        srsLevel: 0, // Initialize SRS
-        nextReview: tomorrowStr, // Schedule for review tomorrow
+        srsLevel: 0,
+        nextReview: tomorrowStr,
     }));
 
     setVocabulary(prev => {
@@ -114,7 +116,6 @@ const App: React.FC = () => {
     });
   }, [setLearningLog, showNotification]);
 
-  // Effect to listen for messages from the service worker (notification clicks)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
         if (event.data?.type === 'notification-action') {
@@ -126,7 +127,6 @@ const App: React.FC = () => {
     return () => navigator.serviceWorker.removeEventListener('message', handleMessage);
   }, [showFollowUpNotification]);
 
-  // Effect for scheduling the initial daily notification
   useEffect(() => {
     if (!settings) return;
 
@@ -136,7 +136,11 @@ const App: React.FC = () => {
         const now = new Date();
         const today = getToday();
         const stateKey = `${NOTIFICATION_STATE_KEY_PREFIX}${today}`;
-        const notifState = JSON.parse(localStorage.getItem(stateKey) || '{ "count": 0 }');
+        const notifStateString = localStorage.getItem(stateKey);
+        let notifState = { count: 0 };
+        try {
+          if (notifStateString) notifState = JSON.parse(notifStateString);
+        } catch (e) {}
         
         const notificationTimeToday = new Date(today);
         notificationTimeToday.setHours(settings.notificationHour);
@@ -156,8 +160,8 @@ const App: React.FC = () => {
         }
     };
 
-    checkTimeAndNotify(); // Check immediately on app load
-    const interval = setInterval(checkTimeAndNotify, 60000); // Then check every minute
+    checkTimeAndNotify();
+    const interval = setInterval(checkTimeAndNotify, 60000);
 
     return () => clearInterval(interval);
   }, [settings, showNotification]);

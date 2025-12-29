@@ -2,14 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Word } from '../types';
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 const synonymAntonymSchema = {
   type: Type.OBJECT,
   properties: {
@@ -31,12 +23,22 @@ const wordSchema = {
   required: ['word', 'meaning_bangla', 'synonyms', 'antonyms', 'examples'],
 };
 
+// Helper to get a fresh AI instance with the current API_KEY
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API key is not configured in environment variables.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
+
 export const fetchDailyWords = async (count: number): Promise<Word[]> => {
   try {
+    const ai = getAI();
     const prompt = `You are an English teacher creating vocabulary flashcards for Bangladeshi students preparing for the IELTS exam. Please generate ${count} vocabulary words. The words should be of intermediate to advanced difficulty. For each word, provide its primary Bangla meaning. Also, for each synonym and antonym, provide its Bangla meaning.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -50,7 +52,6 @@ export const fetchDailyWords = async (count: number): Promise<Word[]> => {
     const jsonText = response.text.trim();
     const words = JSON.parse(jsonText);
     
-    // Basic validation
     if (!Array.isArray(words) || words.length === 0) {
         throw new Error("Invalid response format from Gemini API.");
     }
@@ -64,21 +65,21 @@ export const fetchDailyWords = async (count: number): Promise<Word[]> => {
 
 export const fetchSingleWordDetails = async (wordToFetch: string): Promise<Word> => {
     try {
+        const ai = getAI();
         const prompt = `You are an English teacher creating a vocabulary flashcard for a Bangladeshi student preparing for the IELTS exam. Please generate the details for the word "${wordToFetch}". For the word, provide its primary Bangla meaning. Also, for each synonym and antonym, provide its Bangla meaning.`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-flash-preview",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                responseSchema: wordSchema, // Use the single word schema
+                responseSchema: wordSchema,
             },
         });
 
         const jsonText = response.text.trim();
         const word = JSON.parse(jsonText);
 
-        // Basic validation for a single object
         if (typeof word !== 'object' || word === null || !word.word) {
             throw new Error("Invalid response format from Gemini API for single word.");
         }
@@ -92,10 +93,11 @@ export const fetchSingleWordDetails = async (wordToFetch: string): Promise<Word>
 
 export const generateStoryFromWords = async (words: string[]): Promise<string> => {
     try {
+        const ai = getAI();
         const prompt = `You are an English teacher for Bangladeshi students. Write a short, simple, and engaging paragraph (around 50-70 words) that includes the following vocabulary words: ${words.join(', ')}. The story should be easy to understand for an English learner.`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-flash-preview",
             contents: prompt,
         });
 
