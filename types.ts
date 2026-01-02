@@ -4,12 +4,17 @@ export interface SynonymAntonym {
   meaning: string;
 }
 
+export interface ExamplePair {
+  english: string;
+  bangla: string;
+}
+
 export interface Word {
   word: string;
   meaning_bangla: string;
   synonyms: SynonymAntonym[];
   antonyms: SynonymAntonym[];
-  examples: string[];
+  examples: ExamplePair[];
   isAiGenerated?: boolean;
 }
 
@@ -19,14 +24,7 @@ export interface LearnedWord extends Word {
   nextReview: string;
 }
 
-// FIX: Added missing LearningLog and LearningLogEntry interfaces to resolve import errors.
-export interface LearningLogEntry {
-  status: 'learned' | 'declined';
-}
-
-export interface LearningLog {
-  [date: string]: LearningLogEntry;
-}
+export type LearningGoal = 'general' | 'competitive' | 'ielts';
 
 export interface Settings {
   wordCount: number;
@@ -34,6 +32,13 @@ export interface Settings {
   notificationMinute: number;
   darkMode: boolean;
   readingMode: boolean;
+  goal: LearningGoal;
+}
+
+export interface LearningLog {
+  [date: string]: {
+    status: 'learned' | 'declined';
+  };
 }
 
 export enum View {
@@ -43,14 +48,4 @@ export enum View {
   MANUAL_ADD = 'MANUAL_ADD',
   VOCABULARY = 'VOCABULARY',
   ACCOUNT = 'ACCOUNT',
-}
-
-export interface UserProgress {
-  userId: string;
-  email: string;
-  name: string;
-  image?: string;
-  lastFetchDate: string;
-  wordsGeneratedToday: number;
-  dailyLimit: number;
 }

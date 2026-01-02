@@ -1,63 +1,89 @@
 
-import type { Word } from '../types';
-import { fetchDailyWords } from './geminiService';
-import { starterWords } from '../data/starterWords';
+import type { Word, LearningGoal } from '../types';
+import { fetchCategorizedWords, generateStoryFromWords } from './geminiService';
 
-const WORD_POOL_KEY = 'vocaby_word_pool';
-const RANDOM_OFFSET_KEY = 'vocaby_user_random_offset';
+const RESERVOIR_KEY_PREFIX = 'vocaby_res_v2_';
+const DAILY_LOCK_KEY = 'vocaby_daily_lock_v2';
+const MIN_RESERVOIR_SIZE = 100;
+const FETCH_BATCH_SIZE = 50;
+
+interface DailyLock {
+  date: string;
+  goal: LearningGoal;
+  words: Word[];
+  story: string;
+}
 
 /**
- * Gets daily words from a local pool to ensure instant loading.
- * Shuffles the pool to provide a random selection for each request.
+ * Ensures the local pool has enough words. Fetches silently in background.
  */
-export const getDailyWords = async (count: number, user: any): Promise<Word[]> => {
-    // 1. Manage persistent user randomization offset (-1, 0, +1)
-    let offset = localStorage.getItem(RANDOM_OFFSET_KEY);
-    if (offset === null) {
-      const newOffset = Math.floor(Math.random() * 3) - 1;
-      localStorage.setItem(RANDOM_OFFSET_KEY, newOffset.toString());
-      offset = newOffset.toString();
+const refillReservoir = async (goal: LearningGoal) => {
+  const key = `${RESERVOIR_KEY_PREFIX}${goal}`;
+  const reservoir: Word[] = JSON.parse(localStorage.getItem(key) || '[]');
+  
+  if (reservoir.length < MIN_RESERVOIR_SIZE) {
+    console.debug(`[Reservoir] Refilling ${goal}... Current size: ${reservoir.length}`);
+    try {
+      const newWords = await fetchCategorizedWords(FETCH_BATCH_SIZE, goal);
+      const current = JSON.parse(localStorage.getItem(key) || '[]');
+      const combined = [...current, ...newWords];
+      // Deduplicate
+      const unique = Array.from(new Map(combined.map(w => [w.word.toLowerCase(), w])).values());
+      localStorage.setItem(key, JSON.stringify(unique));
+    } catch (e) {
+      console.error("Reservoir refill failed", e);
     }
-    const adjustedCount = Math.max(3, count + parseInt(offset));
-
-    // 2. Access local word pool
-    let pool: Word[] = JSON.parse(localStorage.getItem(WORD_POOL_KEY) || '[]');
-    
-    // 3. Populate pool if empty using starter words
-    if (pool.length < adjustedCount) {
-        const usedWords = new Set(pool.map(w => w.word));
-        const unusedStarters = starterWords.filter(w => !usedWords.has(w.word));
-        pool = [...pool, ...unusedStarters];
-    }
-
-    // 4. Randomly select words from the pool to simulate different user experiences
-    const selected: Word[] = [];
-    const poolCopy = [...pool];
-    
-    for (let i = 0; i < Math.min(adjustedCount, poolCopy.length); i++) {
-        const randomIndex = Math.floor(Math.random() * poolCopy.length);
-        selected.push(poolCopy.splice(randomIndex, 1)[0]);
-    }
-    
-    // 5. Update pool in storage (removing selected words)
-    localStorage.setItem(WORD_POOL_KEY, JSON.stringify(poolCopy));
-
-    // 6. Background Maintenance: Silent fetch of 30 new words when pool is low
-    if (poolCopy.length < 15) {
-        fetchDailyWords(30).then(newWords => {
-            const currentPool: Word[] = JSON.parse(localStorage.getItem(WORD_POOL_KEY) || '[]');
-            const updatedPool = [...currentPool, ...newWords];
-            // Remove duplicates
-            const uniquePool = Array.from(new Map(updatedPool.map(w => [w.word, w])).values());
-            localStorage.setItem(WORD_POOL_KEY, JSON.stringify(uniquePool));
-        }).catch(err => console.debug("Silent fetch failed, will retry on next check", err));
-    }
-
-    return selected.map(w => ({ ...w, isAiGenerated: true }));
+  }
 };
 
-export const clearDailyCache = () => {
-    localStorage.removeItem('vocaby_daily_words');
-    localStorage.removeItem('vocaby_last_fetch_date');
-    localStorage.removeItem(WORD_POOL_KEY);
+/**
+ * Gets the static words for today. If not yet picked, picks from reservoir and locks them.
+ */
+export const getDailySession = async (goal: LearningGoal, count: number): Promise<{ words: Word[], story: string }> => {
+  const today = new Date().toISOString().split('T')[0];
+  
+  // 1. Check if we already have words locked for today
+  const savedLock = localStorage.getItem(DAILY_LOCK_KEY);
+  if (savedLock) {
+    const lock: DailyLock = JSON.parse(savedLock);
+    if (lock.date === today && lock.goal === goal) {
+      return { words: lock.words, story: lock.story };
+    }
+  }
+
+  // 2. Need to pick new words for today
+  const resKey = `${RESERVOIR_KEY_PREFIX}${goal}`;
+  let reservoir: Word[] = JSON.parse(localStorage.getItem(resKey) || '[]');
+
+  // 3. Emergency fetch if reservoir is empty (e.g., first run)
+  if (reservoir.length < count) {
+    const freshBatch = await fetchCategorizedWords(Math.max(count, MIN_RESERVOIR_SIZE), goal);
+    reservoir = [...reservoir, ...freshBatch];
+  }
+
+  // 4. Select words and update reservoir
+  const selected = reservoir.slice(0, count);
+  const remaining = reservoir.slice(count);
+  localStorage.setItem(resKey, JSON.stringify(remaining));
+
+  // 5. Generate story for these specific words
+  const story = await generateStoryFromWords(selected.map(w => w.word));
+
+  // 6. Lock the session for today
+  const newLock: DailyLock = {
+    date: today,
+    goal: goal,
+    words: selected,
+    story: story
+  };
+  localStorage.setItem(DAILY_LOCK_KEY, JSON.stringify(newLock));
+
+  // 7. Refill background for future days
+  refillReservoir(goal);
+
+  return { words: selected, story };
+};
+
+export const clearDailyLock = () => {
+  localStorage.removeItem(DAILY_LOCK_KEY);
 };

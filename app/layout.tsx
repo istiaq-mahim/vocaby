@@ -1,4 +1,6 @@
 
+// Added React import to resolve namespace error for React.ReactNode
+import React from 'react';
 import './globals.css';
 import { Inter } from 'next/font/google';
 

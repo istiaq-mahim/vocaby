@@ -1,38 +1,74 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import type { Word } from '../types';
+import type { Word, LearningGoal } from '../types';
 
-const synonymAntonymSchema = {
+const examplePairSchema = {
   type: Type.OBJECT,
   properties: {
-    word: { type: Type.STRING, description: 'The English synonym/antonym.' },
-    meaning: { type: Type.STRING, description: 'The corresponding Bangla meaning of the synonym/antonym.' },
+    english: { type: Type.STRING },
+    bangla: { type: Type.STRING },
   },
-  required: ['word', 'meaning'],
+  required: ['english', 'bangla'],
 };
 
 const wordSchema = {
   type: Type.OBJECT,
   properties: {
-    word: { type: Type.STRING, description: 'The English word.' },
-    meaning_bangla: { type: Type.STRING, description: 'The primary meaning of the word in Bengali script.' },
-    synonyms: { type: Type.ARRAY, items: synonymAntonymSchema, description: 'An array of at least 3 synonyms, each with its Bangla meaning. If none, provide an empty array.' },
-    antonyms: { type: Type.ARRAY, items: synonymAntonymSchema, description: 'An array of at least 3 antonyms, each with its Bangla meaning. If none, provide an empty array.' },
-    examples: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'An array of exactly 5 simple English example sentences.' },
+    word: { type: Type.STRING },
+    meaning_bangla: { type: Type.STRING },
+    synonyms: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          word: { type: Type.STRING },
+          meaning: { type: Type.STRING },
+        },
+        required: ['word', 'meaning'],
+      },
+    },
+    antonyms: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          word: { type: Type.STRING },
+          meaning: { type: Type.STRING },
+        },
+        required: ['word', 'meaning'],
+      },
+    },
+    examples: { type: Type.ARRAY, items: examplePairSchema },
   },
   required: ['word', 'meaning_bangla', 'synonyms', 'antonyms', 'examples'],
 };
 
-// Helper to get a fresh AI instance with the current API_KEY
-const getAI = () => {
-  // FIX: Initialize GoogleGenAI strictly using process.env.API_KEY as per the guidelines.
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
-};
+const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-export const fetchDailyWords = async (count: number): Promise<Word[]> => {
+export const fetchCategorizedWords = async (count: number, goal: LearningGoal): Promise<Word[]> => {
   try {
     const ai = getAI();
-    const prompt = `You are an English teacher creating vocabulary flashcards for Bangladeshi students preparing for the IELTS exam. Please generate ${count} vocabulary words. The words should be of intermediate to advanced difficulty. For each word, provide its primary Bangla meaning. Also, for each synonym and antonym, provide its Bangla meaning.`;
+    let trackInstructions = "";
+
+    switch (goal) {
+      case 'general':
+        trackInstructions = "intermediate level (B1/B2) English for daily professional and social life. Avoid very basic words like 'apple' or 'run'. Focus on words like 'mitigate', 'resilient', or 'collaborate'.";
+        break;
+      case 'competitive':
+        trackInstructions = "words that frequently appear in the Bangladesh Civil Service (BCS) exams, Bank job exams, and University Admission tests in Bangladesh. Focus on high-frequency previous year vocabulary.";
+        break;
+      case 'ielts':
+        trackInstructions = "academic and high-level vocabulary necessary for scoring IELTS Band 7.5 or higher. Focus on words suitable for Writing Task 2 and Reading.";
+        break;
+    }
+
+    const prompt = `Generate ${count} English vocabulary words for Bangladeshi students in the "${goal}" track.
+    Context: ${trackInstructions}
+    For each word, provide:
+    1. Primary Bangla meaning.
+    2. 3 Synonyms with Bangla meanings.
+    3. 3 Antonyms with Bangla meanings.
+    4. 3-4 example sentences where EACH sentence MUST have both an English version and its accurate Bangla translation.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -46,61 +82,48 @@ export const fetchDailyWords = async (count: number): Promise<Word[]> => {
       },
     });
 
-    const jsonText = response.text.trim();
-    const words = JSON.parse(jsonText);
-    
-    if (!Array.isArray(words) || words.length === 0) {
-        throw new Error("Invalid response format from Gemini API.");
-    }
-
-    return words as Word[];
+    return JSON.parse(response.text.trim()) as Word[];
   } catch (error) {
-    console.error("Error fetching words from Gemini API:", error);
-    throw new Error("Failed to fetch new words. Please try again later.");
+    console.error("Gemini Fetch Error:", error);
+    return [];
   }
 };
 
-export const fetchSingleWordDetails = async (wordToFetch: string): Promise<Word> => {
-    try {
-        const ai = getAI();
-        const prompt = `You are an English teacher creating a vocabulary flashcard for a Bangladeshi student preparing for the IELTS exam. Please generate the details for the word "${wordToFetch}". For the word, provide its primary Bangla meaning. Also, for each synonym and antonym, provide its Bangla meaning.`;
+// Added fetchSingleWordDetails to resolve import error in ManualAdd.tsx
+export const fetchSingleWordDetails = async (word: string): Promise<Word> => {
+  const ai = getAI();
+  const prompt = `Provide detailed information for the English word: "${word}".
+    Include:
+    1. Primary Bangla meaning.
+    2. 3 Synonyms with Bangla meanings.
+    3. 3 Antonyms with Bangla meanings.
+    4. 3-4 example sentences where EACH sentence MUST have both an English version and its accurate Bangla translation.`;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: wordSchema,
-            },
-        });
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: wordSchema,
+    },
+  });
 
-        const jsonText = response.text.trim();
-        const word = JSON.parse(jsonText);
+  if (!response.text) {
+    throw new Error("No response from AI");
+  }
 
-        if (typeof word !== 'object' || word === null || !word.word) {
-            throw new Error("Invalid response format from Gemini API for single word.");
-        }
-
-        return word as Word;
-    } catch (error) {
-        console.error(`Error fetching details for "${wordToFetch}" from Gemini API:`, error);
-        throw new Error(`Failed to fetch details for "${wordToFetch}". Please check the spelling or try again later.`);
-    }
+  return JSON.parse(response.text.trim()) as Word;
 };
 
 export const generateStoryFromWords = async (words: string[]): Promise<string> => {
     try {
         const ai = getAI();
-        const prompt = `You are an English teacher for Bangladeshi students. Write a short, simple, and engaging paragraph (around 50-70 words) that includes the following vocabulary words: ${words.join(', ')}. The story should be easy to understand for an English learner.`;
-
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
-            contents: prompt,
+            contents: `Write a 100-word engaging story in English using these specific words: ${words.join(', ')}. Then, provide a 1-sentence Bangla summary of the story at the end.`,
         });
-
         return response.text.trim();
     } catch (error) {
-        console.error("Error generating story from Gemini API:", error);
-        return "Sorry, we couldn't create a story for you right now. Please check your connection and try again.";
+        return "Your daily context story is being prepared...";
     }
 };

@@ -10,6 +10,16 @@ const synonymAntonymSchema = {
   required: ['word', 'meaning'],
 };
 
+// Added examplePairSchema to match Word interface in types.ts
+const examplePairSchema = {
+  type: Type.OBJECT,
+  properties: {
+    english: { type: Type.STRING },
+    bangla: { type: Type.STRING },
+  },
+  required: ['english', 'bangla'],
+};
+
 const wordSchema = {
   type: Type.OBJECT,
   properties: {
@@ -17,7 +27,7 @@ const wordSchema = {
     meaning_bangla: { type: Type.STRING },
     synonyms: { type: Type.ARRAY, items: synonymAntonymSchema },
     antonyms: { type: Type.ARRAY, items: synonymAntonymSchema },
-    examples: { type: Type.ARRAY, items: { type: Type.STRING } },
+    examples: { type: Type.ARRAY, items: examplePairSchema },
   },
   required: ['word', 'meaning_bangla', 'synonyms', 'antonyms', 'examples'],
 };
@@ -28,7 +38,8 @@ export const generateWordsAction = async (count: number) => {
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Generate ${count} intermediate/advanced vocabulary words for IELTS students in Bangladesh. Include Bangla meanings.`,
+    contents: `Generate ${count} intermediate/advanced vocabulary words for IELTS students in Bangladesh. 
+    Include Bangla meanings, synonyms/antonyms with Bangla meanings, and 3 example sentences with both English and Bangla translations.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -38,7 +49,7 @@ export const generateWordsAction = async (count: number) => {
     },
   });
 
-  return JSON.parse(response.text);
+  return JSON.parse(response.text.trim());
 };
 
 // FIX: Initialize GoogleGenAI strictly using process.env.API_KEY as per the guidelines.
@@ -48,5 +59,5 @@ export const generateStoryAction = async (words: string[]) => {
     model: "gemini-3-flash-preview",
     contents: `Write a 60-word story for English learners using these words: ${words.join(', ')}.`,
   });
-  return response.text;
+  return response.text.trim();
 };
