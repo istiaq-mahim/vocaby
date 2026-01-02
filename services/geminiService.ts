@@ -16,7 +16,7 @@ const wordSchema = {
   properties: {
     word: { type: Type.STRING },
     meaning_bangla: { type: Type.STRING },
-    reference: { type: Type.STRING, description: "Exam reference like BCS-43, Bank, CU-24, RU-21. Only for competitive track, leave empty otherwise." },
+    reference: { type: Type.STRING, description: "Exam source ONLY for competitive track (e.g. BCS-43, DU 2022, Bank-2023). Leave empty otherwise." },
     synonyms: {
       type: Type.ARRAY,
       items: {
@@ -53,21 +53,21 @@ export const fetchCategorizedWords = async (count: number, goal: LearningGoal): 
 
     switch (goal) {
       case 'general':
-        trackInstructions = "Basic to intermediate daily life English. Focus on common words used in everyday conversations, shopping, travel, and social interactions (e.g., 'appreciate', 'sincere', 'diligent'). Sentences should be simple and practical.";
+        trackInstructions = "Basic, elementary to pre-intermediate daily life English words. Focus on words used in shopping, eating out, meeting friends, and family talk. Use very simple, practical example sentences.";
         break;
       case 'competitive':
-        trackInstructions = "Words specifically from previous Bangladesh Civil Service (BCS) exams (e.g., BCS-10, BCS-43), Bank Job exams, and University Admission tests (e.g., CU-24, RU-21). For each word, include the specific exam reference in the 'reference' field.";
+        trackInstructions = "High-frequency words from Bangladesh Civil Service (BCS), Government Bank Jobs, Dhaka University (DU), Chittagong University (CU), and Rajshahi University (RU) admission tests. You MUST provide the specific exam source in the 'reference' field.";
         break;
       case 'ielts':
-        trackInstructions = "Academic and high-level vocabulary necessary for scoring IELTS Band 7.5 or higher. Focus on words suitable for Writing Task 2 and Reading.";
+        trackInstructions = "Academic and sophisticated vocabulary for IELTS Band 7.5-9. Focus on terms used in Reading and Writing Task 2 essays.";
         break;
     }
 
     const prompt = `Generate ${count} English vocabulary words for Bangladeshi students in the "${goal}" track.
     Context: ${trackInstructions}
-    For each word, provide:
+    Important: For each word, provide:
     1. Primary Bangla meaning.
-    2. A specific exam reference tag (like BCS-43, Bank, DU-22) IF the track is 'competitive'.
+    2. Accurate exam source tags (like BCS-44, Bank-2023, DU Admission) ONLY IF the track is 'competitive'.
     3. 3 Synonyms with Bangla meanings.
     4. 3 Antonyms with Bangla meanings.
     5. 3-4 example sentences where EACH sentence MUST have both an English version and its accurate Bangla translation.`;
