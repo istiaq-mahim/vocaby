@@ -15,6 +15,7 @@ export interface Word {
   synonyms: SynonymAntonym[];
   antonyms: SynonymAntonym[];
   examples: ExamplePair[];
+  reference?: string; // e.g., BCS-43, Bank, CU-24
   isAiGenerated?: boolean;
 }
 

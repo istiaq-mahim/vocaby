@@ -16,6 +16,7 @@ const wordSchema = {
   properties: {
     word: { type: Type.STRING },
     meaning_bangla: { type: Type.STRING },
+    reference: { type: Type.STRING, description: "Exam reference like BCS-43, Bank, CU-24, RU-21. Only for competitive track, leave empty otherwise." },
     synonyms: {
       type: Type.ARRAY,
       items: {
@@ -52,13 +53,13 @@ export const fetchCategorizedWords = async (count: number, goal: LearningGoal): 
 
     switch (goal) {
       case 'general':
-        trackInstructions = "intermediate level (B1/B2) English for daily professional and social life. Avoid very basic words like 'apple' or 'run'. Focus on words like 'mitigate', 'resilient', or 'collaborate'.";
+        trackInstructions = "Basic to intermediate daily life English. Focus on common words used in everyday conversations, shopping, travel, and social interactions (e.g., 'appreciate', 'sincere', 'diligent'). Sentences should be simple and practical.";
         break;
       case 'competitive':
-        trackInstructions = "words that frequently appear in the Bangladesh Civil Service (BCS) exams, Bank job exams, and University Admission tests in Bangladesh. Focus on high-frequency previous year vocabulary.";
+        trackInstructions = "Words specifically from previous Bangladesh Civil Service (BCS) exams (e.g., BCS-10, BCS-43), Bank Job exams, and University Admission tests (e.g., CU-24, RU-21). For each word, include the specific exam reference in the 'reference' field.";
         break;
       case 'ielts':
-        trackInstructions = "academic and high-level vocabulary necessary for scoring IELTS Band 7.5 or higher. Focus on words suitable for Writing Task 2 and Reading.";
+        trackInstructions = "Academic and high-level vocabulary necessary for scoring IELTS Band 7.5 or higher. Focus on words suitable for Writing Task 2 and Reading.";
         break;
     }
 
@@ -66,9 +67,10 @@ export const fetchCategorizedWords = async (count: number, goal: LearningGoal): 
     Context: ${trackInstructions}
     For each word, provide:
     1. Primary Bangla meaning.
-    2. 3 Synonyms with Bangla meanings.
-    3. 3 Antonyms with Bangla meanings.
-    4. 3-4 example sentences where EACH sentence MUST have both an English version and its accurate Bangla translation.`;
+    2. A specific exam reference tag (like BCS-43, Bank, DU-22) IF the track is 'competitive'.
+    3. 3 Synonyms with Bangla meanings.
+    4. 3 Antonyms with Bangla meanings.
+    5. 3-4 example sentences where EACH sentence MUST have both an English version and its accurate Bangla translation.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -89,7 +91,6 @@ export const fetchCategorizedWords = async (count: number, goal: LearningGoal): 
   }
 };
 
-// Added fetchSingleWordDetails to resolve import error in ManualAdd.tsx
 export const fetchSingleWordDetails = async (word: string): Promise<Word> => {
   const ai = getAI();
   const prompt = `Provide detailed information for the English word: "${word}".

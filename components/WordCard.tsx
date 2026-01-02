@@ -21,9 +21,16 @@ const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
     <div className="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-gray-700 word-card-hover cursor-pointer overflow-hidden relative">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-4xl font-extrabold text-[#0052CC] dark:text-blue-400 capitalize mb-2 tracking-tight">
-            {wordData.word}
-          </h2>
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="text-4xl font-extrabold text-[#0052CC] dark:text-blue-400 capitalize tracking-tight">
+              {wordData.word}
+            </h2>
+            {wordData.reference && (
+              <span className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] font-black rounded-lg border border-accent/20">
+                {wordData.reference}
+              </span>
+            )}
+          </div>
           <p className="text-2xl font-bold text-[#4F46E5] bangla-text">
             {wordData.meaning_bangla}
           </p>
