@@ -28,12 +28,16 @@ export interface LearnedWord extends Word {
 export type LearningGoal = 'general' | 'competitive' | 'ielts';
 
 export interface Settings {
+  nickname: string;
+  age: number;
   wordCount: number;
   notificationHour: number;
   notificationMinute: number;
   darkMode: boolean;
   readingMode: boolean;
   goal: LearningGoal;
+  isLinked: boolean;
+  userEmail?: string;
 }
 
 export interface LearningLog {

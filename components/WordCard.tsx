@@ -21,13 +21,13 @@ const WordCard: React.FC<WordCardProps> = ({ wordData }) => {
     <div className="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-gray-700 word-card-hover cursor-pointer overflow-hidden relative">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h2 className="text-4xl font-extrabold text-[#0052CC] dark:text-blue-400 capitalize tracking-tight">
+          <div className="flex items-center flex-wrap gap-2 mb-2">
+            <h2 className="text-4xl font-extrabold text-primary dark:text-blue-400 capitalize tracking-tight">
               {wordData.word}
             </h2>
             {wordData.reference && (
-              <span className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] font-black rounded-lg border border-accent/20">
-                {wordData.reference}
+              <span className="inline-flex items-center px-3 py-1 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-[10px] font-black rounded-full border border-rose-100 dark:border-rose-800 uppercase tracking-tighter">
+                <span className="mr-1 opacity-60 italic">Source:</span> {wordData.reference}
               </span>
             )}
           </div>
@@ -86,7 +86,7 @@ const Section: React.FC<{title: string, items: SynonymAntonym[]}> = ({title, ite
       <div className="flex flex-wrap gap-2">
         {items.map((item, i) => (
           <span key={i} className="px-4 py-2 bg-slate-50 dark:bg-gray-700 rounded-2xl text-sm font-medium border border-slate-100 dark:border-gray-600 flex items-center gap-2 transition-all">
-            <span className="text-[#0052CC] dark:text-blue-300 font-black">{item.word}</span>
+            <span className="text-primary dark:text-blue-300 font-black">{item.word}</span>
             <span className="text-slate-500 dark:text-gray-400 font-normal bangla-text text-xs">({item.meaning})</span>
           </span>
         ))}

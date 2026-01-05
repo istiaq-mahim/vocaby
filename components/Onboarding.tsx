@@ -8,6 +8,8 @@ interface OnboardingProps {
 
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0);
+  const [nickname, setNickname] = useState('');
+  const [age, setAge] = useState<number>(22);
   const [goal, setGoal] = useState<LearningGoal>('ielts');
   const [wordCount, setWordCount] = useState(10);
   const [notificationTime, setNotificationTime] = useState('08:00');
@@ -16,26 +18,33 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     { 
         id: 'ielts', 
         label: 'IELTS Academic', 
-        desc: 'Advanced academic vocabulary for Band 7.5+ success.', 
+        desc: 'Academic vocabulary for achieving Band 7.5+ in Writing/Reading.', 
         icon: '🎓' 
     },
     { 
         id: 'competitive', 
-        label: 'BCS, Bank & Admission', 
-        desc: 'Words from BCS, Bank jobs, and University Admission tests.', 
+        label: 'Exam Excellence', 
+        desc: 'High-yield words from BCS, Govt Banks, and Medical/DU Admission.', 
         icon: '🏛️' 
     },
     { 
         id: 'general', 
-        label: 'Daily Life English', 
-        desc: 'Easy, essential words for daily social and professional life.', 
+        label: 'Practical Social English', 
+        desc: 'Smart words for the Market, Office, Hospital, and Daily Commute.', 
         icon: '🌍' 
     },
   ];
 
   const handleFinish = () => {
     const [hour, minute] = notificationTime.split(':').map(Number);
-    onComplete({ goal, wordCount, notificationHour: hour, notificationMinute: minute });
+    onComplete({ 
+      nickname: nickname || 'Learner', 
+      age: age || 22, 
+      goal, 
+      wordCount, 
+      notificationHour: hour, 
+      notificationMinute: minute 
+    });
   };
 
   return (
@@ -44,9 +53,53 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         
         {step === 0 && (
           <div className="space-y-8">
+             <div className="space-y-2 text-center">
+                <h1 className="text-4xl font-black text-primary tracking-tighter uppercase mb-2">VOCABY</h1>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Create Profile</h2>
+                <p className="text-slate-500 font-medium">Let's get to know you!</p>
+             </div>
+             
+             <div className="space-y-6 text-left">
+                <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Nickname</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Tanvir"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      className="w-full p-6 rounded-2xl bg-white border-2 border-slate-100 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-lg"
+                    />
+                </div>
+                
+                <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Your Age</label>
+                    <input 
+                      type="number" 
+                      min="10" 
+                      max="99"
+                      value={age}
+                      onChange={(e) => setAge(parseInt(e.target.value))}
+                      className="w-full p-6 rounded-2xl bg-white border-2 border-slate-100 focus:border-primary outline-none transition-all font-black text-3xl text-center"
+                    />
+                    <p className="text-[10px] text-slate-400 text-center italic mt-1">Age helps us tailor word complexity for Social English.</p>
+                </div>
+             </div>
+             
+             <button 
+                onClick={() => setStep(1)} 
+                disabled={!nickname || !age}
+                className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform disabled:opacity-50"
+             >
+                Start Learning
+             </button>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="space-y-8">
              <div className="space-y-2">
-                <h1 className="text-4xl font-black text-primary tracking-tighter">Welcome to Vocaby</h1>
-                <p className="text-slate-500 font-medium">What is your learning goal?</p>
+                <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Select Pathway</h2>
+                <p className="text-slate-500 font-medium">Where do you want to excel?</p>
              </div>
              
              <div className="space-y-4">
@@ -75,15 +128,18 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     </button>
                 ))}
              </div>
-             <button onClick={() => setStep(1)} className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Continue</button>
+             <div className="flex gap-4">
+                <button onClick={() => setStep(0)} className="w-1/4 bg-slate-200 text-slate-600 font-black py-5 rounded-2xl">Back</button>
+                <button onClick={() => setStep(2)} className="flex-1 bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Next Step</button>
+             </div>
           </div>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <div className="space-y-8">
              <div className="space-y-2">
-                <h2 className="text-3xl font-black text-slate-800 tracking-tight">Daily Target</h2>
-                <p className="text-slate-500 font-medium">How many words do you want to learn per day?</p>
+                <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Daily Target</h2>
+                <p className="text-slate-500 font-medium">How many new words per day?</p>
              </div>
              
              <div className="grid grid-cols-2 gap-4">
@@ -102,15 +158,18 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 ))}
              </div>
              
-             <button onClick={() => setStep(2)} className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Next Step</button>
+             <div className="flex gap-4">
+                <button onClick={() => setStep(1)} className="w-1/4 bg-slate-200 text-slate-600 font-black py-5 rounded-2xl">Back</button>
+                <button onClick={() => setStep(3)} className="flex-1 bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Final Step</button>
+             </div>
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="space-y-10">
             <div className="space-y-2">
-                <h2 className="text-3xl font-black text-slate-800 tracking-tight">Preferred Time?</h2>
-                <p className="text-slate-400 font-medium">We'll send a daily reminder.</p>
+                <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Reminder Time</h2>
+                <p className="text-slate-400 font-medium italic">"Consistency is the key to mastery."</p>
             </div>
             
             <input 
@@ -120,7 +179,10 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 className="p-8 border-none rounded-[2rem] bg-white text-5xl w-full text-center font-black shadow-inner" 
             />
             
-            <button onClick={handleFinish} className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20">Get Started</button>
+            <div className="flex gap-4">
+                <button onClick={() => setStep(2)} className="w-1/4 bg-slate-200 text-slate-600 font-black py-5 rounded-2xl">Back</button>
+                <button onClick={handleFinish} className="flex-1 bg-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/20">Let's Begin</button>
+            </div>
           </div>
         )}
       </div>

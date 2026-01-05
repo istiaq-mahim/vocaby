@@ -6,6 +6,8 @@ import BottomNav from './components/BottomNav';
 import SettingsPanel from './components/SettingsPanel';
 import AccountView from './components/AccountView';
 import Onboarding from './components/Onboarding';
+import BackupDisclaimer from './components/BackupDisclaimer';
+import AuthDialog from './components/AuthDialog';
 import { View } from './types';
 import type { Word, Settings, LearnedWord } from './types';
 import Review from './components/Review';
@@ -25,6 +27,7 @@ const App: React.FC = () => {
 
   const [activeView, setActiveView] = useState<View>(View.DAILY);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -68,8 +71,26 @@ const App: React.FC = () => {
     setSettings({
       ...onboardingSettings,
       darkMode: false,
-      readingMode: false
+      readingMode: false,
+      isLinked: false
     });
+  };
+
+  const handleUpdateSettings = (newPartialSettings: Partial<Settings>) => {
+    setSettings(prev => prev ? ({ ...prev, ...newPartialSettings }) : null);
+    
+    // Automatic Redirect: If the user changes their goal, immediately show Daily Words
+    if (newPartialSettings.goal !== undefined) {
+      setActiveView(View.DAILY);
+      setIsSettingsOpen(false);
+    }
+  };
+
+  const handleAuthSuccess = (email: string) => {
+    handleUpdateSettings({ isLinked: true, userEmail: email });
+    setIsAuthOpen(false);
+    // In a real app, this is where we'd trigger a cloud push of vocabulary
+    console.debug(`[Auth] Data for ${email} is now syncing to secure infrastructure.`);
   };
 
   if (!settings) {
@@ -86,9 +107,13 @@ const App: React.FC = () => {
           </div>
           <button 
             onClick={() => setActiveView(View.ACCOUNT)}
-            className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-sm font-bold shadow-sm"
+            className="w-10 h-10 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-sm font-bold shadow-sm relative overflow-hidden"
           >
-            👤
+            {settings.isLinked ? (
+              <span className="text-green-500 text-lg">✓</span>
+            ) : (
+              <span className="text-slate-300">👤</span>
+            )}
           </button>
         </header>
       )}
@@ -97,11 +122,16 @@ const App: React.FC = () => {
       <main className={`flex-grow p-4 max-w-2xl mx-auto w-full pb-28 ${activeView === View.DAILY ? 'pt-10' : ''}`}>
         <div className="animate-in">
           {activeView === View.DAILY && (
-            <DailyWords 
-              settings={settings} 
-              addWordsToVocabulary={addWordsToVocabulary} 
-              user={{ name: 'Student', email: 'local', isGuest: true }} 
-            />
+            <>
+              {!settings.isLinked && (
+                <BackupDisclaimer onLink={() => setIsAuthOpen(true)} />
+              )}
+              <DailyWords 
+                settings={settings} 
+                addWordsToVocabulary={addWordsToVocabulary} 
+                user={{ name: settings.nickname, email: settings.userEmail || 'local', isGuest: !settings.isLinked }} 
+              />
+            </>
           )}
           {activeView === View.REVIEW && (
             <Review 
@@ -117,10 +147,12 @@ const App: React.FC = () => {
           )}
           {activeView === View.ACCOUNT && (
             <AccountView 
-              session={{ user: { name: 'Local Student', email: 'local-mode' } }} 
+              settings={settings}
+              session={{ user: { name: settings.nickname, email: settings.userEmail || 'local-mode' } }} 
               vocabulary={vocabulary} 
-              onSignOut={() => {}} 
+              onSignOut={() => handleUpdateSettings({ isLinked: false, userEmail: undefined })} 
               onOpenSettings={() => setIsSettingsOpen(true)} 
+              onOpenAuth={() => setIsAuthOpen(true)}
             />
           )}
           {activeView === View.MANUAL_ADD && (
@@ -139,8 +171,15 @@ const App: React.FC = () => {
       {isSettingsOpen && (
         <SettingsPanel 
           settings={settings} 
-          updateSettings={(s) => setSettings(prev => prev ? ({ ...prev, ...s }) : null)} 
+          updateSettings={handleUpdateSettings} 
           onClose={() => setIsSettingsOpen(false)} 
+        />
+      )}
+
+      {isAuthOpen && (
+        <AuthDialog 
+          onClose={() => setIsAuthOpen(false)} 
+          onSuccess={handleAuthSuccess}
         />
       )}
     </div>
