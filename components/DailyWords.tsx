@@ -9,7 +9,7 @@ import type { Word, Settings } from '../types';
 interface DailyWordsProps {
   settings: Settings;
   addWordsToVocabulary: (words: Word[]) => void;
-  user: { name: string; email: string; isGuest?: boolean };
+  user: { name: string };
 }
 
 const DailyWords: React.FC<DailyWordsProps> = ({ settings, addWordsToVocabulary }) => {

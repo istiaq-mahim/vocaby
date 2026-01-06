@@ -36,8 +36,6 @@ export interface Settings {
   darkMode: boolean;
   readingMode: boolean;
   goal: LearningGoal;
-  isLinked: boolean;
-  userEmail?: string;
 }
 
 export interface LearningLog {

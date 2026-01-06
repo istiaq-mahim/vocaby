@@ -7,7 +7,6 @@ interface SettingsPanelProps {
   settings: Settings;
   updateSettings: (newSettings: Partial<Settings>) => void;
   onClose: () => void;
-  onOpenAuth?: () => void; // Optional if we want to trigger auth from here
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, updateSettings, onClose }) => {
@@ -51,33 +50,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, updateSettings,
                     </div>
                   </div>
                 </div>
-            </section>
-
-            <section className="p-6 bg-slate-50 dark:bg-gray-700 rounded-3xl border border-slate-100 dark:border-gray-600">
-               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Cloud Backup</h3>
-               {settings.isLinked ? (
-                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center text-xl">✓</div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-800 dark:text-white">Account Linked</p>
-                      <p className="text-xs text-slate-400">{settings.userEmail}</p>
-                    </div>
-                 </div>
-               ) : (
-                 <div className="space-y-3">
-                    <p className="text-xs text-slate-500 font-medium">Progress is currently only on this device. Sign in to back up your vocabulary.</p>
-                    <button 
-                      onClick={() => {
-                        onClose();
-                        // This triggers the auth dialog via App state, or we could handle it via a callback
-                        window.dispatchEvent(new CustomEvent('open-auth'));
-                      }}
-                      className="w-full py-4 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 active:scale-95 transition-all"
-                    >
-                      Link Gmail Account
-                    </button>
-                 </div>
-               )}
             </section>
 
             <section>
